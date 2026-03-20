@@ -238,6 +238,29 @@ To use with a trained model:
 
 ---
 
+## 🌐 Deployment (Public Link)
+
+Deploy the app publicly using **Render** (backend) + **Vercel** (frontend) — both free.
+
+### Backend → Render
+1. Go to [render.com](https://render.com) → Sign up with GitHub
+2. **New → Web Service** → Connect this repo
+3. Set **Root Directory**: `backend`, **Runtime**: Python 3
+4. **Build Command**: `pip install -r requirements.txt`
+5. **Start Command**: `gunicorn "app:create_app()" --bind 0.0.0.0:$PORT --timeout 300`
+6. Deploy → Note the URL (e.g. `https://ai-diagnostics-backend.onrender.com`)
+
+### Frontend → Vercel
+1. Go to [vercel.com](https://vercel.com) → Sign up with GitHub
+2. **Add New → Project** → Import this repo
+3. Set **Framework**: Vite, **Root Directory**: `frontend`
+4. Add **Environment Variable**: `VITE_API_URL` = `https://<your-render-url>/api`
+5. Deploy → You get a public URL like `https://ai-diagnostics.vercel.app`
+
+> **Note**: Render free tier sleeps after 15 min of inactivity. First request after idle takes ~30s.
+
+---
+
 ## 📄 License
 
 This project is for educational purposes (B.Tech Final Year Project).
