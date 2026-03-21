@@ -87,7 +87,7 @@ export default function UploadPage() {
                 {/* Loading State */}
                 {isAnalyzing && (
                     <div className="mt-6">
-                        <LoadingSpinner message="Processing X-Ray with DenseNet121... Please wait." />
+                        <LoadingSpinner message="Running AI Analysis (this may take a moment)..." />
                     </div>
                 )}
             </motion.div>
