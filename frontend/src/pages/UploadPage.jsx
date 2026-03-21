@@ -87,7 +87,7 @@ export default function UploadPage() {
                 {/* Loading State */}
                 {isAnalyzing && (
                     <div className="mt-6">
-                        <LoadingSpinner message="Running AI analysis... This may take a moment" />
+                        <LoadingSpinner message="Running AI analysis... Waking up server (may take ~30s on first run)" />
                     </div>
                 )}
             </motion.div>
