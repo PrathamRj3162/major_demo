@@ -2,7 +2,7 @@
 
 ## Pneumonia Detection using Deep Learning, Explainable AI & Federated Learning
 
-**Live Demo (Frontend)**: [Your Vercel URL Here]  
+**Live Demo (Frontend)**: [https://pneumoai-diagnostics.vercel.app/](https://pneumoai-diagnostics.vercel.app/)  
 **Live API (Backend)**: [https://major-demo-1.onrender.com/api/health](https://major-demo-1.onrender.com/api/health)  
 
 > A production-level medical AI system that detects pneumonia from chest X-ray images using DenseNet121 (Transfer Learning), provides visual explanations via Grad-CAM, and demonstrates privacy-preserving federated learning across simulated hospital nodes.
