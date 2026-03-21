@@ -14,7 +14,8 @@ import {
     Network,
     BarChart3,
     Stethoscope,
-    Brain
+    Brain,
+    X
 } from 'lucide-react';
 
 const navItems = [
@@ -25,11 +26,11 @@ const navItems = [
     { path: '/performance', icon: BarChart3, label: 'Model Performance' },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ onClose }) {
     return (
         <aside className="w-72 bg-dark-900/80 backdrop-blur-xl border-r border-dark-700/50 flex flex-col min-h-screen sticky top-0">
             {/* Logo */}
-            <div className="p-6 border-b border-dark-700/50">
+            <div className="p-6 border-b border-dark-700/50 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
                         <Brain className="w-6 h-6 text-white" />
@@ -39,6 +40,11 @@ export default function Sidebar() {
                         <p className="text-xs text-dark-400">Precision Diagnostics</p>
                     </div>
                 </div>
+                {onClose && (
+                    <button onClick={onClose} className="md:hidden p-2 text-dark-400 hover:text-white bg-dark-800 rounded-lg">
+                        <X className="w-5 h-5" />
+                    </button>
+                )}
             </div>
 
             {/* Navigation */}
@@ -47,6 +53,7 @@ export default function Sidebar() {
                     <NavLink
                         key={path}
                         to={path}
+                        onClick={onClose}
                         className={({ isActive }) =>
                             `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group ${isActive
                                 ? 'bg-gradient-to-r from-primary-600/20 to-accent-600/10 text-primary-300 border border-primary-500/20'
