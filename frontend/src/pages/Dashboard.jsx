@@ -12,7 +12,6 @@ import {
     Activity, BrainCircuit, Shield, Upload, TrendingUp,
     Cpu, Database, Zap, ArrowRight, CheckCircle2, AlertTriangle
 } from 'lucide-react';
-import StatCard from '../components/StatCard';
 import { getModelStats } from '../services/api';
 
 export default function Dashboard() {
@@ -76,40 +75,6 @@ export default function Dashboard() {
                     AI-Driven Precision Diagnostics for Pneumonia Detection
                 </p>
             </motion.div>
-
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <StatCard
-                    icon={Activity}
-                    label="Model Accuracy"
-                    value={stats ? `${(stats.classification_report.accuracy * 100).toFixed(1)}%` : '—'}
-                    trend={2.3}
-                    color="primary"
-                    delay={0}
-                />
-                <StatCard
-                    icon={TrendingUp}
-                    label="F1 Score"
-                    value={stats ? `${(stats.classification_report.f1_score * 100).toFixed(1)}%` : '—'}
-                    trend={1.8}
-                    color="accent"
-                    delay={0.1}
-                />
-                <StatCard
-                    icon={CheckCircle2}
-                    label="Precision"
-                    value={stats ? `${(stats.classification_report.precision * 100).toFixed(1)}%` : '—'}
-                    color="green"
-                    delay={0.2}
-                />
-                <StatCard
-                    icon={AlertTriangle}
-                    label="Recall (Sensitivity)"
-                    value={stats ? `${(stats.classification_report.recall * 100).toFixed(1)}%` : '—'}
-                    color="orange"
-                    delay={0.3}
-                />
-            </div>
 
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
