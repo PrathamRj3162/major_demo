@@ -26,6 +26,10 @@ def generate_realistic_metrics():
     Here we generate plausible metrics for a well-trained DenseNet121
     pneumonia classifier.
     """
+    # Freeze the random state so the numbers stay exactly the same on every refresh
+    random.seed(42)
+    np.random.seed(42)
+
     # Simulated confusion matrix for a binary classifier
     # [TN, FP, FN, TP]
     tn = random.randint(220, 250)
