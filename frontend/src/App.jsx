@@ -13,7 +13,6 @@ import Dashboard from './pages/Dashboard';
 import UploadPage from './pages/UploadPage';
 import ResultsPage from './pages/ResultsPage';
 import FederatedPage from './pages/FederatedPage';
-import PerformancePage from './pages/PerformancePage';
 
 export default function App() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -54,7 +53,6 @@ export default function App() {
                         <Route path="/upload" element={<UploadPage />} />
                         <Route path="/results" element={<ResultsPage />} />
                         <Route path="/federated" element={<FederatedPage />} />
-                        <Route path="/performance" element={<PerformancePage />} />
                     </Routes>
                 </main>
             </div>

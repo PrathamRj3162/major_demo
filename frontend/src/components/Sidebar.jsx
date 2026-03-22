@@ -12,7 +12,6 @@ import {
     Upload,
     Activity,
     Network,
-    BarChart3,
     Stethoscope,
     Brain,
     X
@@ -23,7 +22,6 @@ const navItems = [
     { path: '/upload', icon: Upload, label: 'Upload X-Ray' },
     { path: '/results', icon: Activity, label: 'Results' },
     { path: '/federated', icon: Network, label: 'Federated Learning' },
-    { path: '/performance', icon: BarChart3, label: 'Model Performance' },
 ];
 
 export default function Sidebar({ onClose }) {
