@@ -113,3 +113,11 @@ def predict_image():
 
     except Exception as e:
         return jsonify({"error": f"Prediction failed: {str(e)}"}), 500
+
+    finally:
+        # Clean up the uploaded file to prevent disk leaks on the server
+        if image_path and os.path.exists(image_path):
+            try:
+                os.remove(image_path)
+            except Exception as cleanup_err:
+                print(f"Failed to clean up file {image_path}: {cleanup_err}")
