@@ -90,10 +90,8 @@ class GradCAM:
         # Global average pooling of gradients → channel weights
         weights = torch.mean(gradients, dim=(1, 2))  # (C,)
 
-        # Weighted combination of activation maps
-        cam = torch.zeros(activations.shape[1:], dtype=torch.float32).to(self.device)
-        for i, w in enumerate(weights):
-            cam += w * activations[i]
+        # Weighted combination of activation maps (vectorized — no Python loop)
+        cam = torch.sum(weights[:, None, None] * activations, dim=0)
 
         # Apply ReLU — only positive contributions
         cam = torch.relu(cam)

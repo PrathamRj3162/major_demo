@@ -15,7 +15,7 @@ from PIL import Image
 from datetime import datetime
 
 
-def image_to_base64(pil_image: Image.Image, format: str = "JPEG", quality: int = 85) -> str:
+def image_to_base64(pil_image: Image.Image, format: str = "JPEG", quality: int = 75) -> str:
     """
     Convert a PIL Image to a base64-encoded string.
 
