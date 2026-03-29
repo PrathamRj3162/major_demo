@@ -6,8 +6,7 @@ __pycache__/
 venv/
 .env
 
-# PyTorch model weights
-backend/models/best_model.pth
+# PyTorch model weights (included for deployment)
 
 # Uploaded images
 backend/uploads/*
