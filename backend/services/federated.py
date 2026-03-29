@@ -84,15 +84,18 @@ def generate_synthetic_data(num_samples=30, image_size=32):
     images = torch.randn(num_samples, 3, image_size, image_size) * 0.2
     
     # Add class-specific patterns so the model can actually learn
+    center = image_size // 4
+    span = image_size // 3
     for i in range(num_samples):
         if i < num_samples // 2:
             # "Normal" pattern — slight brightness in center
-            images[i, :, 20:44, 20:44] += 0.3
+            images[i, :, center:center+span, center:center+span] += 0.3
         else:
             # "Pneumonia" pattern — patchy regions
-            h = random.randint(10, 30)
-            w = random.randint(10, 30)
-            images[i, :, h:h+20, w:w+20] += 0.5
+            h = random.randint(2, image_size // 2)
+            w = random.randint(2, image_size // 2)
+            patch = image_size // 4
+            images[i, :, h:h+patch, w:w+patch] += 0.5
     
     labels = torch.cat([
         torch.zeros(num_samples // 2, dtype=torch.long),

@@ -60,21 +60,26 @@ def create_app():
     app.register_blueprint(federated_bp)
     app.register_blueprint(stats_bp)
     
-    # ─── Preload Model & GradCAM at Startup ─────────────
-    # This eliminates the 10-15s cold start on the first request
-    with app.app_context():
-        try:
-            from models.model_loader import get_model
-            print("[App] Preloading DenseNet121 model...")
-            get_model()
-            print("[App] Model preloaded successfully!")
-            
-            print("[App] Initializing GradCAM...")
-            get_gradcam()
-            print("[App] GradCAM ready!")
-        except Exception as e:
-            print(f"[App] Warning: Model preload failed: {e}")
-            print("[App] Model will load on first request instead.")
+    # ─── Preload Model & GradCAM on First Request ──────
+    # Uses before_request to lazy-load on the first API call.
+    # This avoids Gunicorn boot timeout on Render's free tier.
+    _preloaded = {"done": False}
+    
+    @app.before_request
+    def preload_model():
+        if not _preloaded["done"]:
+            try:
+                from models.model_loader import get_model
+                print("[App] Preloading DenseNet121 model...")
+                get_model()
+                print("[App] Model preloaded successfully!")
+                
+                print("[App] Initializing GradCAM...")
+                get_gradcam()
+                print("[App] GradCAM ready!")
+            except Exception as e:
+                print(f"[App] Warning: Model preload failed: {e}")
+            _preloaded["done"] = True
     
     # ─── Health Check ───────────────────────────────────
     @app.route("/api/health", methods=["GET"])
