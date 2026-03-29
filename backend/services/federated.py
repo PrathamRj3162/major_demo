@@ -51,27 +51,21 @@ class LightweightPneumoniaNet(nn.Module):
     def __init__(self, num_classes=2):
         super(LightweightPneumoniaNet, self).__init__()
         self.features = nn.Sequential(
-            nn.Conv2d(3, 16, kernel_size=3, padding=1),
-            nn.BatchNorm2d(16),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(2, 2),          # 32x32
-            
-            nn.Conv2d(16, 32, kernel_size=3, padding=1),
-            nn.BatchNorm2d(32),
+            nn.Conv2d(3, 8, kernel_size=3, padding=1),
+            nn.BatchNorm2d(8),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(2, 2),          # 16x16
             
-            nn.Conv2d(32, 64, kernel_size=3, padding=1),
-            nn.BatchNorm2d(64),
+            nn.Conv2d(8, 16, kernel_size=3, padding=1),
+            nn.BatchNorm2d(16),
             nn.ReLU(inplace=True),
             nn.AdaptiveAvgPool2d((4, 4)) # 4x4
         )
         self.classifier = nn.Sequential(
-            nn.Dropout(0.3),
-            nn.Linear(64 * 4 * 4, 128),
-            nn.ReLU(inplace=True),
             nn.Dropout(0.2),
-            nn.Linear(128, num_classes)
+            nn.Linear(16 * 4 * 4, 64),
+            nn.ReLU(inplace=True),
+            nn.Linear(64, num_classes)
         )
     
     def forward(self, x):
@@ -81,7 +75,7 @@ class LightweightPneumoniaNet(nn.Module):
         return x
 
 
-def generate_synthetic_data(num_samples=60, image_size=64):
+def generate_synthetic_data(num_samples=30, image_size=32):
     """
     Generate synthetic data that simulates chest X-ray distributions.
     Uses smaller images (64x64) for fast CPU training.
@@ -113,7 +107,7 @@ def generate_synthetic_data(num_samples=60, image_size=64):
     return images, labels
 
 
-def create_client_data_shards(num_clients=NUM_CLIENTS, samples_per_client=60):
+def create_client_data_shards(num_clients=NUM_CLIENTS, samples_per_client=30):
     """
     Create non-IID data shards for each client.
     """

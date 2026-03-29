@@ -26,6 +26,19 @@ from routes.gradcam_routes import gradcam_bp
 from routes.federated_routes import federated_bp
 from routes.stats_routes import stats_bp
 
+# Singleton GradCAM instance (cached across requests)
+_gradcam_instance = None
+
+
+def get_gradcam():
+    """Get or create the singleton GradCAM instance."""
+    global _gradcam_instance
+    if _gradcam_instance is None:
+        from services.gradcam import GradCAM
+        _gradcam_instance = GradCAM()
+        print("[App] GradCAM instance created and cached.")
+    return _gradcam_instance
+
 
 def create_app():
     """
@@ -46,6 +59,22 @@ def create_app():
     app.register_blueprint(gradcam_bp)
     app.register_blueprint(federated_bp)
     app.register_blueprint(stats_bp)
+    
+    # ─── Preload Model & GradCAM at Startup ─────────────
+    # This eliminates the 10-15s cold start on the first request
+    with app.app_context():
+        try:
+            from models.model_loader import get_model
+            print("[App] Preloading DenseNet121 model...")
+            get_model()
+            print("[App] Model preloaded successfully!")
+            
+            print("[App] Initializing GradCAM...")
+            get_gradcam()
+            print("[App] GradCAM ready!")
+        except Exception as e:
+            print(f"[App] Warning: Model preload failed: {e}")
+            print("[App] Model will load on first request instead.")
     
     # ─── Health Check ───────────────────────────────────
     @app.route("/api/health", methods=["GET"])

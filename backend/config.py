@@ -22,8 +22,8 @@ CONFIDENCE_THRESHOLD = 0.70  # Below this → "Needs Review"
 
 # ─── Federated Learning ──────────────────────────────────
 NUM_CLIENTS = 4
-FED_ROUNDS = 5
-LOCAL_EPOCHS = 2
+FED_ROUNDS = 3
+LOCAL_EPOCHS = 1
 FED_BATCH_SIZE = 16
 FED_LEARNING_RATE = 0.001
 

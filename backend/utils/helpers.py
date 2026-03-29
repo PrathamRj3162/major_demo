@@ -15,19 +15,27 @@ from PIL import Image
 from datetime import datetime
 
 
-def image_to_base64(pil_image: Image.Image, format: str = "PNG") -> str:
+def image_to_base64(pil_image: Image.Image, format: str = "JPEG", quality: int = 85) -> str:
     """
     Convert a PIL Image to a base64-encoded string.
 
     Args:
         pil_image: PIL Image object.
-        format: Image format (PNG, JPEG, etc.).
+        format: Image format (JPEG for speed, PNG for lossless).
+        quality: JPEG quality (1-100). 85 is good balance of quality/size.
 
     Returns:
         Base64 string with data URI prefix for direct embedding in HTML/React.
     """
     buffer = io.BytesIO()
-    pil_image.save(buffer, format=format)
+    # Ensure RGB mode for JPEG (JPEG doesn't support RGBA)
+    if format.upper() == "JPEG" and pil_image.mode in ("RGBA", "P", "LA"):
+        pil_image = pil_image.convert("RGB")
+    save_kwargs = {"format": format}
+    if format.upper() == "JPEG":
+        save_kwargs["quality"] = quality
+        save_kwargs["optimize"] = True
+    pil_image.save(buffer, **save_kwargs)
     img_bytes = buffer.getvalue()
     b64_string = base64.b64encode(img_bytes).decode("utf-8")
     mime = f"image/{format.lower()}"

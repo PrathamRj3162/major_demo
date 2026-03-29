@@ -60,8 +60,9 @@ def generate_gradcam():
         # Get prediction first
         result = predict(image_tensor)
 
-        # Generate Grad-CAM
-        gradcam = GradCAM()
+        # Generate Grad-CAM (using cached singleton)
+        from app import get_gradcam
+        gradcam = get_gradcam()
         overlay_img, heatmap_img = gradcam.generate_overlay(
             image_tensor, pil_image, target_class=result["predicted_index"]
         )

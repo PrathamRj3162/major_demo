@@ -13,7 +13,7 @@ const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 const api = axios.create({
     baseURL: API_BASE,
-    timeout: 300000, // 5 min timeout for federated training
+    timeout: 120000, // 2 min timeout (optimized backend is faster now)
 });
 
 /**

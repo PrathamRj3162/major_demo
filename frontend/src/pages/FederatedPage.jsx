@@ -23,7 +23,7 @@ const CLIENT_COLORS = ['#6366f1', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#
 
 export default function FederatedPage() {
     const [numClients, setNumClients] = useState(4);
-    const [numRounds, setNumRounds] = useState(5);
+    const [numRounds, setNumRounds] = useState(3);
     const [isTraining, setIsTraining] = useState(false);
     const [trainingLog, setTrainingLog] = useState(null);
     const [error, setError] = useState(null);

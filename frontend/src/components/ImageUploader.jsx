@@ -3,6 +3,7 @@
  * ========================
  * Drag-and-drop file upload zone with image preview.
  * Uses react-dropzone for drag events and file validation.
+ * Includes client-side image compression for faster uploads.
  */
 
 import React, { useCallback, useState } from 'react';
@@ -10,11 +11,68 @@ import { useDropzone } from 'react-dropzone';
 import { Upload, X, FileImage, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+/**
+ * Compress an image file client-side before uploading.
+ * Resizes to max 800px and converts to JPEG quality 0.8.
+ * This reduces upload time dramatically (5MB → ~200KB).
+ */
+function compressImage(file, maxSize = 800, quality = 0.8) {
+    return new Promise((resolve) => {
+        // Skip compression for small files (< 500KB)
+        if (file.size < 500 * 1024) {
+            resolve(file);
+            return;
+        }
+
+        const img = new Image();
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        img.onload = () => {
+            let { width, height } = img;
+
+            // Scale down proportionally
+            if (width > maxSize || height > maxSize) {
+                if (width > height) {
+                    height = Math.round((height * maxSize) / width);
+                    width = maxSize;
+                } else {
+                    width = Math.round((width * maxSize) / height);
+                    height = maxSize;
+                }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+
+            canvas.toBlob(
+                (blob) => {
+                    if (blob) {
+                        const compressedFile = new File([blob], file.name, {
+                            type: 'image/jpeg',
+                            lastModified: Date.now(),
+                        });
+                        resolve(compressedFile);
+                    } else {
+                        resolve(file); // Fallback to original
+                    }
+                },
+                'image/jpeg',
+                quality
+            );
+        };
+
+        img.onerror = () => resolve(file); // Fallback on error
+        img.src = URL.createObjectURL(file);
+    });
+}
+
 export default function ImageUploader({ onFileSelect, isLoading = false }) {
     const [preview, setPreview] = useState(null);
     const [error, setError] = useState(null);
 
-    const onDrop = useCallback((acceptedFiles, rejectedFiles) => {
+    const onDrop = useCallback(async (acceptedFiles, rejectedFiles) => {
         setError(null);
 
         if (rejectedFiles.length > 0) {
@@ -31,12 +89,14 @@ export default function ImageUploader({ onFileSelect, isLoading = false }) {
                 return;
             }
 
-            // Create preview
+            // Create preview from original
             const reader = new FileReader();
             reader.onload = () => setPreview(reader.result);
             reader.readAsDataURL(file);
 
-            onFileSelect(file);
+            // Compress image before sending to backend
+            const compressedFile = await compressImage(file);
+            onFileSelect(compressedFile);
         }
     }, [onFileSelect]);
 
