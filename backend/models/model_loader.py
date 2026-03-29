@@ -58,18 +58,6 @@ def load_model():
 
     _model = _model.to(device)
     _model.eval()
-    
-    # Apply dynamic quantization for faster CPU inference
-    # This makes linear layers ~2-3x faster on Render's weak CPU
-    if device.type == "cpu":
-        try:
-            _model = torch.quantization.quantize_dynamic(
-                _model, {torch.nn.Linear}, dtype=torch.qint8
-            )
-            print("[Model Loader] Dynamic quantization applied (INT8 linear layers).")
-        except Exception as e:
-            print(f"[Model Loader] Quantization skipped: {e}")
-    
     print("[Model Loader] Model loaded and set to evaluation mode.")
 
     return _model
