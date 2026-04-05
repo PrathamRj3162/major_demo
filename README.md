@@ -279,4 +279,4 @@ This project is for educational purposes (B.Tech Final Year Project).
 
 ---
 
-**Built with ❤️ using PyTorch, Flask, React, and Tailwind CSS**
+**Built with using PyTorch, Flask, React, and Tailwind CSS**
