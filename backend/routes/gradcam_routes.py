@@ -1,8 +1,6 @@
 """
-Grad-CAM Routes
-================
-Handles:
-  POST /api/gradcam — Generate Grad-CAM heatmap for an uploaded image
+Grad-CAM route — generates heatmap visualisations for uploaded X-rays.
+POST /api/gradcam
 """
 
 import os
@@ -19,21 +17,12 @@ gradcam_bp = Blueprint("gradcam", __name__)
 @gradcam_bp.route("/api/gradcam", methods=["POST"])
 def generate_gradcam():
     """
-    Generate Grad-CAM visualization for a chest X-ray image.
-    
-    Accepts:
-      - multipart/form-data with 'file' field
-      - JSON body with 'filename' (previously uploaded)
-    
-    Returns:
-      - Original image (base64)
-      - Grad-CAM overlay image (base64)
-      - Raw heatmap image (base64)
-      - Prediction and confidence
+    Generate a Grad-CAM heatmap for a given X-ray.
+    Returns the original image, the overlay, and the raw heatmap,
+    all as base64. Also includes the prediction + confidence.
     """
     image_path = None
 
-    # Handle file upload
     if "file" in request.files:
         file = request.files["file"]
         is_valid, error_msg = validate_image(file)
@@ -44,7 +33,6 @@ def generate_gradcam():
         image_path = os.path.join(UPLOAD_FOLDER, unique_name)
         file.save(image_path)
 
-    # Handle filename reference
     elif request.is_json and "filename" in request.json:
         filename = request.json["filename"]
         image_path = os.path.join(UPLOAD_FOLDER, filename)
@@ -54,13 +42,10 @@ def generate_gradcam():
         return jsonify({"error": "Provide a file or filename"}), 400
 
     try:
-        # Preprocess
         image_tensor, pil_image = preprocess_image(image_path)
 
-        # Get prediction first
         result = predict(image_tensor)
 
-        # Generate Grad-CAM (using cached singleton)
         from app import get_gradcam
         gradcam = get_gradcam()
         overlay_img, heatmap_img = gradcam.generate_overlay(
@@ -80,7 +65,7 @@ def generate_gradcam():
         return jsonify({"error": f"Grad-CAM generation failed: {str(e)}"}), 500
 
     finally:
-        # Clean up the uploaded file to prevent disk leaks
+        # delete the uploaded file after we're done
         if image_path and os.path.exists(image_path):
             try:
                 os.remove(image_path)

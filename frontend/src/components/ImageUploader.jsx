@@ -1,24 +1,16 @@
-/**
- * ImageUploader Component
- * ========================
- * Drag-and-drop file upload zone with image preview.
- * Uses react-dropzone for drag events and file validation.
- * Includes client-side image compression for faster uploads.
- */
+// Drag-and-drop image upload zone with preview
+// Also does client-side compression before sending to the backend
 
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, X, FileImage, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-/**
- * Compress an image file client-side before uploading.
- * Resizes to max 800px and converts to JPEG quality 0.8.
- * This reduces upload time dramatically (5MB → ~200KB).
- */
+// shrink large images before uploading so it's faster
+// (a 5MB xray becomes ~200KB after this)
 function compressImage(file, maxSize = 800, quality = 0.8) {
     return new Promise((resolve) => {
-        // Skip compression for small files (< 500KB)
+        // don't bother compressing small files
         if (file.size < 500 * 1024) {
             resolve(file);
             return;
@@ -31,7 +23,7 @@ function compressImage(file, maxSize = 800, quality = 0.8) {
         img.onload = () => {
             let { width, height } = img;
 
-            // Scale down proportionally
+            // scale down but keep aspect ratio
             if (width > maxSize || height > maxSize) {
                 if (width > height) {
                     height = Math.round((height * maxSize) / width);
@@ -55,7 +47,7 @@ function compressImage(file, maxSize = 800, quality = 0.8) {
                         });
                         resolve(compressedFile);
                     } else {
-                        resolve(file); // Fallback to original
+                        resolve(file);
                     }
                 },
                 'image/jpeg',
@@ -63,7 +55,7 @@ function compressImage(file, maxSize = 800, quality = 0.8) {
             );
         };
 
-        img.onerror = () => resolve(file); // Fallback on error
+        img.onerror = () => resolve(file);
         img.src = URL.createObjectURL(file);
     });
 }
@@ -83,18 +75,17 @@ export default function ImageUploader({ onFileSelect, isLoading = false }) {
         if (acceptedFiles.length > 0) {
             const file = acceptedFiles[0];
 
-            // Validate file size (max 16MB)
             if (file.size > 16 * 1024 * 1024) {
                 setError('File too large. Maximum size is 16MB.');
                 return;
             }
 
-            // Create preview from original
+            // show preview right away
             const reader = new FileReader();
             reader.onload = () => setPreview(reader.result);
             reader.readAsDataURL(file);
 
-            // Compress image before sending to backend
+            // compress then pass to parent
             const compressedFile = await compressImage(file);
             onFileSelect(compressedFile);
         }
@@ -180,7 +171,6 @@ export default function ImageUploader({ onFileSelect, isLoading = false }) {
                 </AnimatePresence>
             </div>
 
-            {/* Error message */}
             <AnimatePresence>
                 {error && (
                     <motion.div

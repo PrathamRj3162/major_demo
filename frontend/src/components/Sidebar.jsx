@@ -1,9 +1,4 @@
-/**
- * Sidebar Navigation Component
- * =============================
- * Fixed sidebar with icon + text navigation links.
- * Features gradient active state, hover effects, and the app logo.
- */
+// Sidebar nav — shows on desktop, slides in on mobile
 
 import React from 'react';
 import { NavLink } from 'react-router-dom';
@@ -27,7 +22,7 @@ const navItems = [
 export default function Sidebar({ onClose }) {
     return (
         <aside className="w-72 bg-dark-900/80 backdrop-blur-xl border-r border-dark-700/50 flex flex-col min-h-screen sticky top-0">
-            {/* Logo */}
+            {/* logo + app name */}
             <div className="p-6 border-b border-dark-700/50 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
@@ -45,7 +40,7 @@ export default function Sidebar({ onClose }) {
                 )}
             </div>
 
-            {/* Navigation */}
+            {/* nav links */}
             <nav className="flex-1 p-4 space-y-1">
                 {navItems.map(({ path, icon: Icon, label }) => (
                     <NavLink
@@ -65,7 +60,7 @@ export default function Sidebar({ onClose }) {
                 ))}
             </nav>
 
-            {/* Footer */}
+            {/* bottom badge */}
             <div className="p-4 border-t border-dark-700/50">
                 <div className="glass-card p-4 text-center">
                     <Stethoscope className="w-8 h-8 text-accent-400 mx-auto mb-2" />

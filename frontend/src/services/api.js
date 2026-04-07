@@ -1,26 +1,16 @@
-/**
- * API Service Layer
- * ==================
- * Centralized API communication module.
- * All backend API calls go through this service.
- */
+// API service — all backend calls go through here
 
 import axios from 'axios';
 
-// In production, VITE_API_URL points to the deployed backend (e.g. https://xxx.onrender.com/api)
-// In local development, Vite proxy forwards /api to localhost:5001
+// use the env variable in production, otherwise proxy through vite
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 const api = axios.create({
     baseURL: API_BASE,
-    timeout: 120000, // 2 min timeout (optimized backend is faster now)
+    timeout: 120000, // 2 min — model inference can be slow
 });
 
-/**
- * Upload an X-ray image and get a prediction with Grad-CAM.
- * @param {File} file - The image file to upload.
- * @returns {Promise} API response with prediction, confidence, and Grad-CAM.
- */
+// upload an X-ray and get prediction + Grad-CAM back
 export const predictImage = async (file) => {
     const formData = new FormData();
     formData.append('file', file);
@@ -30,11 +20,7 @@ export const predictImage = async (file) => {
     return response.data;
 };
 
-/**
- * Upload an X-ray image only (without prediction).
- * @param {File} file - The image file to upload.
- * @returns {Promise} API response with filename.
- */
+// just upload without running inference
 export const uploadImage = async (file) => {
     const formData = new FormData();
     formData.append('file', file);
@@ -44,11 +30,7 @@ export const uploadImage = async (file) => {
     return response.data;
 };
 
-/**
- * Generate Grad-CAM for an uploaded image.
- * @param {File} file - The image file.
- * @returns {Promise} API response with Grad-CAM images.
- */
+// get Grad-CAM visualisation for an image
 export const generateGradCAM = async (file) => {
     const formData = new FormData();
     formData.append('file', file);
@@ -58,12 +40,7 @@ export const generateGradCAM = async (file) => {
     return response.data;
 };
 
-/**
- * Run federated learning simulation.
- * @param {number} numClients - Number of simulated clients.
- * @param {number} numRounds - Number of training rounds.
- * @returns {Promise} API response with training logs.
- */
+// run federated learning simulation
 export const runFederatedTraining = async (numClients = 4, numRounds = 5) => {
     const response = await api.post('/federated-train', {
         num_clients: numClients,
@@ -72,19 +49,13 @@ export const runFederatedTraining = async (numClients = 4, numRounds = 5) => {
     return response.data;
 };
 
-/**
- * Get model performance statistics.
- * @returns {Promise} API response with metrics, confusion matrix, etc.
- */
+// grab model performance stats for the dashboard
 export const getModelStats = async () => {
     const response = await api.get('/model-stats');
     return response.data;
 };
 
-/**
- * Health check.
- * @returns {Promise} API health status.
- */
+// quick check if the backend is alive
 export const healthCheck = async () => {
     const response = await api.get('/health');
     return response.data;

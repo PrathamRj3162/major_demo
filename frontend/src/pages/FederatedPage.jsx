@@ -1,10 +1,4 @@
-/**
- * Federated Learning Dashboard
- * ==============================
- * Interactive dashboard for running and visualizing federated learning
- * simulation. Shows per-round metrics, per-client performance, and
- * global model convergence.
- */
+// Federated learning page — configure and run the simulation, view results
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -43,7 +37,7 @@ export default function FederatedPage() {
         }
     };
 
-    // Prepare chart data from training log
+    // build data for the convergence line chart
     const getConvergenceData = () => {
         if (!trainingLog) return [];
         return trainingLog.rounds.map((round) => ({
@@ -53,6 +47,7 @@ export default function FederatedPage() {
         }));
     };
 
+    // build data for the client comparison bar chart
     const getClientComparisonData = () => {
         if (!trainingLog) return [];
         const lastRound = trainingLog.rounds[trainingLog.rounds.length - 1];
@@ -66,7 +61,6 @@ export default function FederatedPage() {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -80,7 +74,7 @@ export default function FederatedPage() {
                 </p>
             </motion.div>
 
-            {/* Configuration & Controls */}
+            {/* controls */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -93,7 +87,6 @@ export default function FederatedPage() {
                 </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Number of Clients */}
                     <div>
                         <label className="text-dark-300 text-sm font-medium block mb-2">
                             Hospital Clients
@@ -112,7 +105,6 @@ export default function FederatedPage() {
                         </div>
                     </div>
 
-                    {/* Number of Rounds */}
                     <div>
                         <label className="text-dark-300 text-sm font-medium block mb-2">
                             Training Rounds
@@ -131,7 +123,6 @@ export default function FederatedPage() {
                         </div>
                     </div>
 
-                    {/* Start Button */}
                     <div className="flex items-end">
                         <button
                             onClick={startTraining}
@@ -154,7 +145,7 @@ export default function FederatedPage() {
                     </div>
                 </div>
 
-                {/* Architecture Diagram (text) */}
+                {/* simple architecture diagram */}
                 <div className="mt-6 p-4 bg-dark-800/40 rounded-xl">
                     <p className="text-dark-500 text-xs font-medium uppercase tracking-wider mb-3">Architecture</p>
                     <div className="flex items-center justify-center gap-2 flex-wrap text-sm">
@@ -174,12 +165,10 @@ export default function FederatedPage() {
                 </div>
             </motion.div>
 
-            {/* Loading */}
             {isTraining && (
                 <LoadingSpinner message={`Running federated training with ${numClients} clients over ${numRounds} rounds...`} />
             )}
 
-            {/* Error */}
             {error && (
                 <motion.div
                     initial={{ opacity: 0 }}
@@ -190,7 +179,7 @@ export default function FederatedPage() {
                 </motion.div>
             )}
 
-            {/* Results */}
+            {/* results section */}
             <AnimatePresence>
                 {trainingLog && (
                     <motion.div
@@ -198,7 +187,7 @@ export default function FederatedPage() {
                         animate={{ opacity: 1, y: 0 }}
                         className="space-y-6"
                     >
-                        {/* Summary */}
+                        {/* summary cards */}
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div className="glass-card p-4 text-center">
                                 <Users className="w-6 h-6 text-primary-400 mx-auto mb-2" />
@@ -226,7 +215,7 @@ export default function FederatedPage() {
                             </div>
                         </div>
 
-                        {/* Convergence Chart */}
+                        {/* convergence chart */}
                         <div className="glass-card p-6">
                             <h3 className="text-lg font-semibold text-white mb-4">Global Model Convergence</h3>
                             <ResponsiveContainer width="100%" height={300}>
@@ -266,7 +255,7 @@ export default function FederatedPage() {
                             </ResponsiveContainer>
                         </div>
 
-                        {/* Client Comparison */}
+                        {/* client comparison */}
                         <div className="glass-card p-6">
                             <h3 className="text-lg font-semibold text-white mb-4">Client Performance Comparison (Final Round)</h3>
                             <ResponsiveContainer width="100%" height={300}>
@@ -289,7 +278,7 @@ export default function FederatedPage() {
                             </ResponsiveContainer>
                         </div>
 
-                        {/* Training Log Table */}
+                        {/* detailed log table */}
                         <div className="glass-card p-6 overflow-x-auto">
                             <h3 className="text-lg font-semibold text-white mb-4">Detailed Training Log</h3>
                             <table className="w-full text-sm text-left">

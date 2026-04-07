@@ -1,9 +1,5 @@
-/**
- * GradCamViewer Component
- * ========================
- * Displays original X-ray, Grad-CAM heatmap overlay,
- * and raw heatmap in a side-by-side comparison layout.
- */
+// Shows the Grad-CAM results — lets you toggle between
+// the overlay, original X-ray, and raw heatmap views
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
@@ -39,7 +35,7 @@ export default function GradCamViewer({ originalImage, overlayImage, heatmapImag
                 Explainable AI — Grad-CAM Visualization
             </h3>
 
-            {/* View Toggle */}
+            {/* view toggle buttons */}
             <div className="flex gap-2 mb-4">
                 {views.map(({ id, label, icon: Icon }) => (
                     <button
@@ -56,7 +52,7 @@ export default function GradCamViewer({ originalImage, overlayImage, heatmapImag
                 ))}
             </div>
 
-            {/* Image Display */}
+            {/* the image */}
             <div className="relative rounded-xl overflow-hidden bg-dark-900/60 border border-dark-700/50">
                 <motion.img
                     key={activeView}
@@ -69,7 +65,7 @@ export default function GradCamViewer({ originalImage, overlayImage, heatmapImag
                 />
             </div>
 
-            {/* Legend */}
+            {/* colour legend */}
             <div className="mt-4 flex items-center justify-center gap-6 text-xs text-dark-400">
                 <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-blue-500" />

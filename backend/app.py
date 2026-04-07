@@ -1,68 +1,48 @@
 """
-AI-Driven Precision Diagnostics System — Flask Application
-============================================================
-Main entry point for the backend server.
-
-This Flask application provides REST APIs for:
-  - /api/upload       — Upload chest X-ray images
-  - /api/predict      — Run pneumonia detection inference
-  - /api/gradcam      — Generate Grad-CAM visual explanations
-  - /api/federated-train — Run federated learning simulation
-  - /api/model-stats  — Get model performance metrics
-
-The application uses:
-  - DenseNet121 (transfer learning) for classification
-  - Grad-CAM for explainable AI
-  - FedAvg for federated learning simulation
+Flask backend for the pneumonia detection system.
+Sets up routes, CORS, and handles model loading.
 """
 
 from flask import Flask, jsonify
 from flask_cors import CORS
 from config import UPLOAD_FOLDER
 
-# Import route blueprints
 from routes.predict_routes import predict_bp
 from routes.gradcam_routes import gradcam_bp
 from routes.federated_routes import federated_bp
 from routes.stats_routes import stats_bp
 
-# Singleton GradCAM instance (cached across requests)
+# keep one GradCAM object alive so we don't reload the model every request
 _gradcam_instance = None
 
 
 def get_gradcam():
-    """Get or create the singleton GradCAM instance."""
+    """Return the shared GradCAM instance, creating it on first call."""
     global _gradcam_instance
     if _gradcam_instance is None:
         from services.gradcam import GradCAM
         _gradcam_instance = GradCAM()
-        print("[App] GradCAM instance created and cached.")
+        print("[App] GradCAM ready.")
     return _gradcam_instance
 
 
 def create_app():
-    """
-    Application factory function.
-    Creates and configures the Flask application.
-    """
+    """Build and configure the Flask app."""
     app = Flask(__name__)
     
-    # ─── Configuration ──────────────────────────────────
     app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-    app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16MB max upload
+    app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16 MB limit
     
-    # ─── CORS ───────────────────────────────────────────
     CORS(app, resources={r"/api/*": {"origins": "*"}})
     
-    # ─── Register Blueprints ────────────────────────────
+    # register route blueprints
     app.register_blueprint(predict_bp)
     app.register_blueprint(gradcam_bp)
     app.register_blueprint(federated_bp)
     app.register_blueprint(stats_bp)
     
-    # ─── Preload Model & GradCAM on First Request ──────
-    # Uses before_request to lazy-load on the first API call.
-    # This avoids Gunicorn boot timeout on Render's free tier.
+    # lazy-load model + gradcam on the very first request so gunicorn
+    # doesn't time out during boot on Render free tier
     _preloaded = {"done": False}
     
     @app.before_request
@@ -70,18 +50,17 @@ def create_app():
         if not _preloaded["done"]:
             try:
                 from models.model_loader import get_model
-                print("[App] Preloading DenseNet121 model...")
+                print("[App] Loading DenseNet model...")
                 get_model()
-                print("[App] Model preloaded successfully!")
+                print("[App] Model loaded.")
                 
-                print("[App] Initializing GradCAM...")
+                print("[App] Setting up GradCAM...")
                 get_gradcam()
-                print("[App] GradCAM ready!")
+                print("[App] GradCAM set up.")
             except Exception as e:
-                print(f"[App] Warning: Model preload failed: {e}")
+                print(f"[App] Warning: preload failed: {e}")
             _preloaded["done"] = True
     
-    # ─── Health Check ───────────────────────────────────
     @app.route("/api/health", methods=["GET"])
     def health_check():
         return jsonify({
@@ -90,7 +69,6 @@ def create_app():
             "version": "1.0.0"
         }), 200
     
-    # ─── Error Handlers ─────────────────────────────────
     @app.errorhandler(404)
     def not_found(e):
         return jsonify({"error": "Endpoint not found"}), 404
@@ -106,7 +84,6 @@ def create_app():
     return app
 
 
-# ─── Application Entry Point ───────────────────────────
 if __name__ == "__main__":
     app = create_app()
     

@@ -1,9 +1,5 @@
-/**
- * ConfidenceGauge Component
- * ==========================
- * Animated circular gauge that displays the model's confidence score.
- * Uses SVG for the ring and CSS transitions for smooth animation.
- */
+// Circular gauge that shows the model's confidence score
+// Colour changes based on confidence level (green/yellow/red)
 
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
@@ -20,7 +16,6 @@ export default function ConfidenceGauge({ confidence = 0, size = 180 }) {
         return () => clearTimeout(timer);
     }, [confidence]);
 
-    // Color based on confidence level
     const getColor = (val) => {
         if (val >= 80) return { stroke: '#10b981', text: 'text-emerald-400', label: 'High Confidence' };
         if (val >= 60) return { stroke: '#f59e0b', text: 'text-amber-400', label: 'Moderate' };
@@ -38,7 +33,7 @@ export default function ConfidenceGauge({ confidence = 0, size = 180 }) {
         >
             <div className="relative" style={{ width: size, height: size }}>
                 <svg width={size} height={size} className="transform -rotate-90">
-                    {/* Background ring */}
+                    {/* background ring */}
                     <circle
                         cx={size / 2}
                         cy={size / 2}
@@ -47,7 +42,7 @@ export default function ConfidenceGauge({ confidence = 0, size = 180 }) {
                         strokeWidth="12"
                         fill="none"
                     />
-                    {/* Active ring */}
+                    {/* coloured progress ring */}
                     <circle
                         cx={size / 2}
                         cy={size / 2}
@@ -62,7 +57,7 @@ export default function ConfidenceGauge({ confidence = 0, size = 180 }) {
                     />
                 </svg>
 
-                {/* Center text */}
+                {/* percentage in the middle */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                     <span className={`text-4xl font-bold ${colorInfo.text}`}>
                         {animatedValue.toFixed(1)}%

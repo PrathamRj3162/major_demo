@@ -1,12 +1,7 @@
 """
-DenseNet121 Model for Pneumonia Detection
-==========================================
-Uses transfer learning from ImageNet-pretrained DenseNet121.
-The final classifier is replaced with a 2-class head for binary
-classification (Normal vs Pneumonia).
-
-Architecture:
-  DenseNet121 features (frozen) → AdaptiveAvgPool → Dropout → Linear(1024, 2)
+DenseNet121 wrapper for binary pneumonia classification.
+We use transfer learning — freeze the pretrained backbone and only
+train a new classifier head on top.
 """
 
 import torch
@@ -16,27 +11,24 @@ from torchvision import models
 
 class PneumoniaNet(nn.Module):
     """
-    DenseNet121-based binary classifier for pneumonia detection.
-    
-    The feature extraction layers are frozen to leverage pretrained
-    ImageNet representations. Only the final classifier head is trained,
-    making training fast and effective even with limited medical data.
+    Binary classifier built on top of DenseNet121.
+    The feature layers stay frozen (ImageNet weights), and we swap
+    the final layer for our own 2-class head.
     """
 
     def __init__(self, num_classes=2, pretrained=True):
         super(PneumoniaNet, self).__init__()
 
-        # Load pretrained DenseNet121 backbone
+        # load the pretrained DenseNet backbone
         self.densenet = models.densenet121(
             weights=models.DenseNet121_Weights.IMAGENET1K_V1 if pretrained else None
         )
 
-        # Freeze feature extraction layers for transfer learning
+        # freeze everything except the classifier
         for param in self.densenet.features.parameters():
             param.requires_grad = False
 
-        # Replace the classifier head
-        # DenseNet121 has 1024 features before the classifier
+        # replace the default classifier with our own
         num_features = self.densenet.classifier.in_features
         self.densenet.classifier = nn.Sequential(
             nn.Dropout(p=0.3),
@@ -47,19 +39,12 @@ class PneumoniaNet(nn.Module):
         )
 
     def forward(self, x):
-        """Forward pass through the network."""
         return self.densenet(x)
 
     def get_features_module(self):
-        """
-        Returns the feature extraction module (used by Grad-CAM).
-        Specifically returns the last DenseBlock for activation mapping.
-        """
+        """Needed by Grad-CAM to hook into the feature extractor."""
         return self.densenet.features
 
     def get_last_conv_layer(self):
-        """
-        Returns the last convolutional layer name for Grad-CAM.
-        In DenseNet121, this is 'features.denseblock4'.
-        """
+        """Returns denseblock4 — the layer Grad-CAM attaches to."""
         return self.densenet.features.denseblock4

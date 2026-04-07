@@ -1,8 +1,4 @@
-/**
- * LoadingSpinner Component
- * =========================
- * Animated loading indicator with optional message.
- */
+// Animated loading spinner with a pulsing brain icon
 
 import React from 'react';
 import { motion } from 'framer-motion';
@@ -22,14 +18,12 @@ export default function LoadingSpinner({ message = 'Analyzing...', size = 'md' }
             className="flex flex-col items-center justify-center py-12"
         >
             <div className="relative">
-                {/* Outer ring */}
                 <motion.div
                     className={`${sizeClasses[size]} border-4 border-dark-700 border-t-primary-500 rounded-full`}
                     animate={{ rotate: 360 }}
                     transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                 />
 
-                {/* Inner icon */}
                 <div className="absolute inset-0 flex items-center justify-center">
                     <motion.div
                         animate={{ scale: [1, 1.2, 1] }}

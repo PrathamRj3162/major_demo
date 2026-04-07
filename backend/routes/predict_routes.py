@@ -1,9 +1,7 @@
 """
-Prediction & Upload Routes
-===========================
-Handles:
-  POST /api/upload   — Upload an X-ray image
-  POST /api/predict  — Run inference on an uploaded image
+Routes for uploading X-ray images and running predictions.
+POST /api/upload  — save an image
+POST /api/predict — upload + run the model + return results with Grad-CAM
 """
 
 import os
@@ -19,12 +17,7 @@ predict_bp = Blueprint("predict", __name__)
 
 @predict_bp.route("/api/upload", methods=["POST"])
 def upload_image():
-    """
-    Upload a chest X-ray image.
-    
-    Accepts multipart/form-data with a 'file' field.
-    Validates the image, saves it, and returns the saved filename.
-    """
+    """Save an uploaded chest X-ray, validate it first."""
     if "file" not in request.files:
         return jsonify({"error": "No file part in the request"}), 400
 
@@ -32,12 +25,10 @@ def upload_image():
     if file.filename == "":
         return jsonify({"error": "No file selected"}), 400
 
-    # Validate image
     is_valid, error_msg = validate_image(file)
     if not is_valid:
         return jsonify({"error": error_msg}), 400
 
-    # Save with unique filename
     unique_name = generate_unique_filename(file.filename)
     save_path = os.path.join(UPLOAD_FOLDER, unique_name)
     file.save(save_path)
@@ -52,18 +43,13 @@ def upload_image():
 @predict_bp.route("/api/predict", methods=["POST"])
 def predict_image():
     """
-    Run full inference pipeline on an uploaded image.
-    
-    Accepts either:
-      - multipart/form-data with 'file' field (direct upload + predict)
-      - JSON body with 'filename' field (predict a previously uploaded image)
-    
-    Returns prediction, confidence, probabilities, review status,
-    and optional Grad-CAM visualization.
+    Run the full pipeline: preprocess -> model inference -> Grad-CAM.
+    Accepts either a direct file upload or a filename of a previously
+    uploaded image.
     """
     image_path = None
 
-    # Option 1: Direct file upload
+    # direct file upload
     if "file" in request.files:
         file = request.files["file"]
         is_valid, error_msg = validate_image(file)
@@ -74,7 +60,7 @@ def predict_image():
         image_path = os.path.join(UPLOAD_FOLDER, unique_name)
         file.save(image_path)
 
-    # Option 2: Previously uploaded filename
+    # or reference an already-uploaded file
     elif request.is_json and "filename" in request.json:
         filename = request.json["filename"]
         image_path = os.path.join(UPLOAD_FOLDER, filename)
@@ -85,20 +71,17 @@ def predict_image():
         return jsonify({"error": "Provide a file upload or filename in JSON body"}), 400
 
     try:
-        # Preprocess the image
         image_tensor, pil_image = preprocess_image(image_path)
 
-        # Run inference
         result = predict(image_tensor)
 
-        # Generate Grad-CAM (using cached singleton)
+        # grab the shared GradCAM instance
         from app import get_gradcam
         gradcam = get_gradcam()
         overlay_img, heatmap_img = gradcam.generate_overlay(
             image_tensor, pil_image, target_class=result["predicted_index"]
         )
 
-        # Build response
         response = format_prediction_response(
             prediction=result["predicted_class"],
             confidence=result["confidence"],
@@ -116,7 +99,7 @@ def predict_image():
         return jsonify({"error": f"Prediction failed: {str(e)}"}), 500
 
     finally:
-        # Clean up the uploaded file to prevent disk leaks on the server
+        # clean up the temp file so uploads don't pile up on disk
         if image_path and os.path.exists(image_path):
             try:
                 os.remove(image_path)

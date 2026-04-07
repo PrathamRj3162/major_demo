@@ -1,13 +1,4 @@
-/**
- * Results Page
- * =============
- * Displays prediction results after analysis:
- *   - Prediction label (NORMAL / PNEUMONIA)
- *   - Confidence gauge
- *   - Needs Review badge if low confidence
- *   - Grad-CAM visualization (overlay, original, heatmap)
- *   - Per-class probability bars
- */
+// Results page — shows prediction, confidence gauge, Grad-CAM, and details
 
 import React from 'react';
 import { useLocation, Link, Navigate } from 'react-router-dom';
@@ -23,7 +14,7 @@ export default function ResultsPage() {
     const location = useLocation();
     const result = location.state?.result;
 
-    // Redirect if no result data
+    // if someone lands here directly without analysing anything, send them to upload
     if (!result) {
         return <Navigate to="/upload" replace />;
     }
@@ -33,7 +24,6 @@ export default function ResultsPage() {
 
     return (
         <div className="max-w-5xl mx-auto space-y-6">
-            {/* Header */}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -52,7 +42,7 @@ export default function ResultsPage() {
                 </Link>
             </motion.div>
 
-            {/* Prediction Card */}
+            {/* main prediction card */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -65,7 +55,6 @@ export default function ResultsPage() {
                     }`}
             >
                 <div className="flex flex-col md:flex-row items-center gap-8">
-                    {/* Prediction Label */}
                     <div className="flex-1 text-center md:text-left">
                         <div className="flex items-center justify-center md:justify-start gap-3 mb-3">
                             {needsReview ? (
@@ -81,7 +70,6 @@ export default function ResultsPage() {
                             </span>
                         </div>
 
-                        {/* Status Badge */}
                         {needsReview && (
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.9 }}
@@ -93,7 +81,7 @@ export default function ResultsPage() {
                             </motion.div>
                         )}
 
-                        {/* Probabilities */}
+                        {/* per-class probability bars */}
                         <div className="space-y-3 mt-4">
                             {result.probabilities && Object.entries(result.probabilities).map(([cls, prob]) => (
                                 <div key={cls} className="space-y-1">
@@ -115,14 +103,13 @@ export default function ResultsPage() {
                         </div>
                     </div>
 
-                    {/* Confidence Gauge */}
                     <div className="flex-shrink-0">
                         <ConfidenceGauge confidence={result.confidence} size={200} />
                     </div>
                 </div>
             </motion.div>
 
-            {/* Grad-CAM Visualization */}
+            {/* Grad-CAM images */}
             {result.gradcam_image && (
                 <GradCamViewer
                     originalImage={result.original_image}
@@ -131,7 +118,7 @@ export default function ResultsPage() {
                 />
             )}
 
-            {/* Details Card */}
+            {/* extra details */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -166,7 +153,6 @@ export default function ResultsPage() {
                 </div>
             </motion.div>
 
-            {/* Back to Upload */}
             <div className="flex justify-center pt-4">
                 <Link to="/upload" className="btn-secondary flex items-center gap-2">
                     <ArrowLeft className="w-4 h-4" />

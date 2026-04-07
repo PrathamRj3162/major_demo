@@ -1,25 +1,13 @@
 """
-Federated Learning Simulation
-==============================
-Simulates federated learning across multiple hospital clients using
-the FedAvg (Federated Averaging) algorithm.
+Federated learning simulation using FedAvg.
 
-Architecture:
-  ┌──────────────────────────────────────────────┐
-  │              Central Server                   │
-  │   (Aggregates client model updates)          │
-  │   FedAvg: weighted avg of parameters         │
-  └──────────┬────────┬────────┬────────┬────────┘
-             │        │        │        │
-      ┌──────┴──┐ ┌──┴──────┐ ┌──┴──────┐ ┌──┴──────┐
-      │Client 1 │ │Client 2 │ │Client 3 │ │Client 4 │
-      │Hospital │ │Hospital │ │Hospital │ │Hospital │
-      │  A      │ │  B      │ │  C      │ │  D      │
-      └─────────┘ └─────────┘ └─────────┘ └─────────┘
+Instead of training the full DenseNet121 (way too slow on CPU), we use
+a small CNN that has the same kind of structure. This lets us demo
+the federated averaging algorithm with actual convergence, just without
+needing a GPU or real patient data.
 
-For CPU efficiency, we use a lightweight CNN that mirrors the
-DenseNet121 classifier structure but is fast to train on CPU.
-In production, the full DenseNet121 would be used with GPU clusters.
+The setup simulates multiple hospital clients each training on their
+own local data, then a central server aggregates the updates.
 """
 
 import copy
@@ -37,15 +25,9 @@ from config import (
 
 class LightweightPneumoniaNet(nn.Module):
     """
-    Lightweight CNN for federated learning simulation.
-    
-    Uses a compact architecture optimized for CPU training speed
-    while maintaining the same classification interface as the
-    full DenseNet121 model (binary: Normal vs Pneumonia).
-    
-    In a real hospital deployment, the full DenseNet121 would be
-    used with GPU acceleration. This model demonstrates the
-    FedAvg algorithm with realistic convergence behavior.
+    Small CNN used just for the federated learning demo.
+    Runs fast on CPU while still showing proper convergence.
+    In production you'd use the full DenseNet here.
     """
     
     def __init__(self, num_classes=2):
@@ -54,12 +36,12 @@ class LightweightPneumoniaNet(nn.Module):
             nn.Conv2d(3, 8, kernel_size=3, padding=1),
             nn.BatchNorm2d(8),
             nn.ReLU(inplace=True),
-            nn.MaxPool2d(2, 2),          # 16x16
-            
+            nn.MaxPool2d(2, 2),
+
             nn.Conv2d(8, 16, kernel_size=3, padding=1),
             nn.BatchNorm2d(16),
             nn.ReLU(inplace=True),
-            nn.AdaptiveAvgPool2d((4, 4)) # 4x4
+            nn.AdaptiveAvgPool2d((4, 4))
         )
         self.classifier = nn.Sequential(
             nn.Dropout(0.2),
@@ -77,21 +59,20 @@ class LightweightPneumoniaNet(nn.Module):
 
 def generate_synthetic_data(num_samples=30, image_size=32):
     """
-    Generate synthetic data that simulates chest X-ray distributions.
-    Uses smaller images (64x64) for fast CPU training.
+    Create fake X-ray-like data for the simulation.
+    Normal images get a bright center, pneumonia images get random
+    patchy regions — enough difference for the model to learn something.
     """
-    # Generate normalized random images (simulating preprocessed X-rays)
     images = torch.randn(num_samples, 3, image_size, image_size) * 0.2
     
-    # Add class-specific patterns so the model can actually learn
     center = image_size // 4
     span = image_size // 3
     for i in range(num_samples):
         if i < num_samples // 2:
-            # "Normal" pattern — slight brightness in center
+            # "normal" — slight brightness in the middle
             images[i, :, center:center+span, center:center+span] += 0.3
         else:
-            # "Pneumonia" pattern — patchy regions
+            # "pneumonia" — random bright patch
             h = random.randint(2, image_size // 2)
             w = random.randint(2, image_size // 2)
             patch = image_size // 4
@@ -102,7 +83,7 @@ def generate_synthetic_data(num_samples=30, image_size=32):
         torch.ones(num_samples - num_samples // 2, dtype=torch.long)
     ])
     
-    # Shuffle
+    # shuffle everything
     indices = torch.randperm(num_samples)
     images = images[indices]
     labels = labels[indices]
@@ -111,9 +92,7 @@ def generate_synthetic_data(num_samples=30, image_size=32):
 
 
 def create_client_data_shards(num_clients=NUM_CLIENTS, samples_per_client=30):
-    """
-    Create non-IID data shards for each client.
-    """
+    """Give each client its own chunk of synthetic data."""
     client_loaders = []
     
     for i in range(num_clients):
@@ -127,9 +106,7 @@ def create_client_data_shards(num_clients=NUM_CLIENTS, samples_per_client=30):
 
 
 def train_client(model, dataloader, epochs=LOCAL_EPOCHS, lr=FED_LEARNING_RATE):
-    """
-    Train a model locally on one client's data.
-    """
+    """Train a model on one client's local data for a few epochs."""
     device = next(model.parameters()).device
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
@@ -166,13 +143,8 @@ def train_client(model, dataloader, epochs=LOCAL_EPOCHS, lr=FED_LEARNING_RATE):
 
 def fedavg_aggregate(global_model, client_models, client_data_sizes):
     """
-    Federated Averaging (FedAvg) algorithm.
-    
-    Aggregates client model parameters using weighted averaging,
-    where weights are proportional to each client's dataset size.
-    
-    Algorithm:
-      θ_global = Σ (n_k / n) * θ_k
+    FedAvg: average the client model weights, weighted by how much
+    data each client has. Clients with more data get more influence.
     """
     total_data = sum(client_data_sizes)
     global_dict = global_model.state_dict()
@@ -192,7 +164,7 @@ def fedavg_aggregate(global_model, client_models, client_data_sizes):
 
 
 def evaluate_global_model(model, test_loader):
-    """Evaluate the global model on a test set."""
+    """Check how well the global model is doing on the test set."""
     device = next(model.parameters()).device
     model.eval()
     criterion = nn.CrossEntropyLoss()
@@ -221,27 +193,25 @@ def evaluate_global_model(model, test_loader):
 def run_federated_simulation(num_clients=NUM_CLIENTS, num_rounds=FED_ROUNDS,
                                progress_callback=None):
     """
-    Run a complete federated learning simulation.
-
-    Uses a lightweight CNN for fast CPU training while demonstrating
-    the FedAvg algorithm with realistic convergence behavior.
+    Run the whole federated learning loop:
+    1. Create a global model and client data shards
+    2. Each round: send model to clients, train locally, aggregate back
+    3. Evaluate the global model after each round
+    4. Return all the logs for the frontend to display
     """
-    device = torch.device("cpu")  # CPU for simulation
+    device = torch.device("cpu")
     
-    # Initialize lightweight global model
     global_model = LightweightPneumoniaNet(num_classes=NUM_CLASSES)
     global_model = global_model.to(device)
     
-    # Create client data shards
     client_loaders = create_client_data_shards(num_clients)
     client_data_sizes = [len(loader.dataset) for loader in client_loaders]
     
-    # Create a test set for global evaluation
+    # separate test set for evaluating the global model
     test_images, test_labels = generate_synthetic_data(40)
     test_dataset = TensorDataset(test_images, test_labels)
     test_loader = DataLoader(test_dataset, batch_size=FED_BATCH_SIZE)
     
-    # Training logs
     training_log = {
         "num_clients": num_clients,
         "num_rounds": num_rounds,
@@ -269,6 +239,7 @@ def run_federated_simulation(num_clients=NUM_CLIENTS, num_rounds=FED_ROUNDS,
         client_models = []
         
         for client_id in range(num_clients):
+            # each client gets a fresh copy of the global model
             local_model = copy.deepcopy(global_model)
             trained_model, metrics = train_client(
                 local_model, 
@@ -292,10 +263,10 @@ def run_federated_simulation(num_clients=NUM_CLIENTS, num_rounds=FED_ROUNDS,
                   f"Loss={client_log['final_loss']:.4f}, "
                   f"Acc={client_log['final_accuracy']:.4f}")
         
-        # FedAvg aggregation
+        # aggregate all client models into the global one
         global_model = fedavg_aggregate(global_model, client_models, client_data_sizes)
         
-        # Evaluate global model
+        # see how the aggregated model performs
         global_metrics = evaluate_global_model(global_model, test_loader)
         training_log["global_metrics"].append(global_metrics)
         

@@ -1,12 +1,4 @@
-/**
- * Model Performance Page
- * =======================
- * Comprehensive model performance dashboard showing:
- *   - Confusion matrix heatmap
- *   - Training loss/accuracy curves
- *   - ROC curve
- *   - Classification metrics
- */
+// Model performance dashboard — confusion matrix, training curves, ROC, metrics
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
@@ -42,7 +34,6 @@ export default function PerformancePage() {
         }
     };
 
-    // Prepare training history for charts
     const getTrainingData = () => {
         if (!metrics) return [];
         return metrics.training_history.epochs.map((epoch, i) => ({
@@ -78,7 +69,6 @@ export default function PerformancePage() {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -92,7 +82,7 @@ export default function PerformancePage() {
                 </p>
             </motion.div>
 
-            {/* Key Metrics Row */}
+            {/* key metrics */}
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 {[
                     { label: 'Accuracy', value: `${(classification_report.accuracy * 100).toFixed(1)}%`, icon: Target, color: 'text-primary-400' },
@@ -115,7 +105,7 @@ export default function PerformancePage() {
                 ))}
             </div>
 
-            {/* Confusion Matrix */}
+            {/* confusion matrix */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -125,12 +115,10 @@ export default function PerformancePage() {
                 <h3 className="text-lg font-semibold text-white mb-4">Confusion Matrix</h3>
                 <div className="flex flex-col items-center">
                     <div className="grid grid-cols-3 gap-1 text-center max-w-md">
-                        {/* Header row */}
                         <div></div>
                         <div className="text-dark-400 text-sm font-medium py-2">Pred: Normal</div>
                         <div className="text-dark-400 text-sm font-medium py-2">Pred: Pneumonia</div>
 
-                        {/* Actual Normal row */}
                         <div className="text-dark-400 text-sm font-medium py-2 flex items-center justify-end pr-3">
                             Actual: Normal
                         </div>
@@ -143,7 +131,6 @@ export default function PerformancePage() {
                             <p className="text-dark-500 text-xs">FP</p>
                         </div>
 
-                        {/* Actual Pneumonia row */}
                         <div className="text-dark-400 text-sm font-medium py-2 flex items-center justify-end pr-3">
                             Actual: Pneumonia
                         </div>
@@ -163,9 +150,8 @@ export default function PerformancePage() {
                 </div>
             </motion.div>
 
-            {/* Charts Row */}
+            {/* training curves */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Training Loss Curves */}
                 <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -193,7 +179,6 @@ export default function PerformancePage() {
                     </ResponsiveContainer>
                 </motion.div>
 
-                {/* Training Accuracy Curves */}
                 <motion.div
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -222,7 +207,7 @@ export default function PerformancePage() {
                 </motion.div>
             </div>
 
-            {/* ROC Curve */}
+            {/* ROC curve */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -265,12 +250,11 @@ export default function PerformancePage() {
                                 <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
                             </linearGradient>
                         </defs>
-                        {/* Diagonal reference line would go here */}
                     </AreaChart>
                 </ResponsiveContainer>
             </motion.div>
 
-            {/* Model Info */}
+            {/* model config */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

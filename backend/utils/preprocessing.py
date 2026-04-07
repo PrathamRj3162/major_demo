@@ -1,15 +1,8 @@
 """
-Image Preprocessing Pipeline
-=============================
-Handles all image transformations needed before model inference:
-  1. Load image from file path or PIL Image
-  2. Resize to 224×224
-  3. Convert to RGB
-  4. Normalize with ImageNet mean/std
-  5. Convert to PyTorch tensor with batch dimension
-
-These transforms match the preprocessing used during DenseNet121
-training on ImageNet, ensuring consistent feature extraction.
+Image preprocessing pipeline for the DenseNet model.
+Handles loading images from different sources (file path, bytes, PIL),
+resizing to 224x224, converting to RGB, normalising with ImageNet
+stats, and adding the batch dimension the model expects.
 """
 
 import io
@@ -20,10 +13,7 @@ from config import IMAGE_SIZE, IMAGENET_MEAN, IMAGENET_STD
 
 
 def get_transform():
-    """
-    Returns the standard preprocessing transform pipeline.
-    This matches ImageNet preprocessing for DenseNet121.
-    """
+    """Standard transform chain — resize, tensor, normalise."""
     return transforms.Compose([
         transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
         transforms.ToTensor(),
@@ -33,16 +23,11 @@ def get_transform():
 
 def preprocess_image(image_source):
     """
-    Preprocess an image for model inference.
-
-    Args:
-        image_source: Can be a file path (str), PIL Image, or bytes.
-
-    Returns:
-        tensor: Preprocessed image tensor of shape (1, 3, 224, 224).
-        pil_image: The original PIL image (RGB) for Grad-CAM overlay.
+    Take an image (path, bytes, or PIL object), run it through the
+    preprocessing pipeline, and return the tensor + original PIL image.
+    The PIL image is kept around because Grad-CAM needs it for the overlay.
     """
-    # Load image based on source type
+    # figure out what we got and open it
     if isinstance(image_source, str):
         pil_image = Image.open(image_source)
     elif isinstance(image_source, bytes):
@@ -52,14 +37,13 @@ def preprocess_image(image_source):
     else:
         raise ValueError(f"Unsupported image source type: {type(image_source)}")
 
-    # Convert to RGB (medical images may be grayscale)
+    # X-rays are often grayscale, model needs RGB
     pil_image = pil_image.convert("RGB")
 
-    # Apply preprocessing transforms
     transform = get_transform()
     tensor = transform(pil_image)
 
-    # Add batch dimension: (3, 224, 224) → (1, 3, 224, 224)
+    # model expects shape (batch, channels, h, w)
     tensor = tensor.unsqueeze(0)
 
     return tensor, pil_image
@@ -67,14 +51,9 @@ def preprocess_image(image_source):
 
 def validate_image(file):
     """
-    Validate that an uploaded file is a valid image.
-
-    Args:
-        file: Uploaded file object.
-
-    Returns:
-        bool: True if valid, False otherwise.
-        str: Error message if invalid, empty string if valid.
+    Quick check that an uploaded file is actually a valid image
+    in one of our supported formats.
+    Returns (True, "") if ok, or (False, error_message) if not.
     """
     if file is None:
         return False, "No file provided."
@@ -89,7 +68,7 @@ def validate_image(file):
     try:
         img = Image.open(file.stream)
         img.verify()
-        file.stream.seek(0)  # Reset stream after verify
+        file.stream.seek(0)  # reset so Flask can read it again later
         return True, ""
     except Exception as e:
         return False, f"Invalid image file: {str(e)}"

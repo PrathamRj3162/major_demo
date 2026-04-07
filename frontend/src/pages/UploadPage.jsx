@@ -1,9 +1,4 @@
-/**
- * Upload X-Ray Page
- * ==================
- * Full upload interface with drag-and-drop, image preview,
- * and one-click analysis trigger.
- */
+// Upload page — drag-and-drop an X-ray and hit "Analyze with AI"
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -27,7 +22,6 @@ export default function UploadPage() {
 
         try {
             const result = await predictImage(selectedFile);
-            // Navigate to results page with data
             navigate('/results', { state: { result } });
         } catch (err) {
             console.error('Analysis failed:', err);
@@ -41,7 +35,6 @@ export default function UploadPage() {
 
     return (
         <div className="max-w-3xl mx-auto space-y-6">
-            {/* Header */}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -55,7 +48,6 @@ export default function UploadPage() {
                 </p>
             </motion.div>
 
-            {/* Upload Area */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -67,7 +59,6 @@ export default function UploadPage() {
                     isLoading={isAnalyzing}
                 />
 
-                {/* Analyze Button */}
                 {selectedFile && !isAnalyzing && (
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
@@ -84,7 +75,6 @@ export default function UploadPage() {
                     </motion.div>
                 )}
 
-                {/* Loading State */}
                 {isAnalyzing && (
                     <div className="mt-6">
                         <LoadingSpinner message="Running AI Analysis (this may take a moment)..." />
@@ -92,7 +82,6 @@ export default function UploadPage() {
                 )}
             </motion.div>
 
-            {/* Error Display */}
             {error && (
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
@@ -109,7 +98,7 @@ export default function UploadPage() {
                 </motion.div>
             )}
 
-            {/* Info Card */}
+            {/* how it works section */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

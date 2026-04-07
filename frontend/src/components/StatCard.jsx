@@ -1,9 +1,4 @@
-/**
- * StatCard Component
- * ===================
- * Animated statistics card for the dashboard.
- * Shows an icon, label, value, and optional trend indicator.
- */
+// Dashboard stat card — icon, label, big number, optional trend arrow
 
 import React from 'react';
 import { motion } from 'framer-motion';

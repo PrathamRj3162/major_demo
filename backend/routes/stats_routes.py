@@ -1,14 +1,10 @@
 """
-Model Statistics & Performance Routes
-=======================================
-Handles:
-  GET /api/model-stats — Return model performance metrics
+Returns model performance stats for the dashboard.
+GET /api/model-stats
 
-Provides pre-computed metrics for the dashboard including:
-  - Confusion matrix
-  - Classification report (precision, recall, F1)
-  - Training history (loss/accuracy curves)
-  - ROC AUC data
+In a real setup these numbers would come from actual evaluation on
+the test set. For demo purposes we generate realistic-looking metrics
+with a fixed seed so they stay consistent across page refreshes.
 """
 
 import random
@@ -20,18 +16,14 @@ stats_bp = Blueprint("stats", __name__)
 
 def generate_realistic_metrics():
     """
-    Generate realistic model performance metrics for the dashboard.
-    
-    In production, these would be computed from actual validation data.
-    Here we generate plausible metrics for a well-trained DenseNet121
-    pneumonia classifier.
+    Produce a set of plausible performance numbers for a DenseNet121
+    pneumonia classifier. Seed is fixed so the dashboard always shows
+    the same values.
     """
-    # Freeze the random state so the numbers stay exactly the same on every refresh
     random.seed(42)
     np.random.seed(42)
 
-    # Simulated confusion matrix for a binary classifier
-    # [TN, FP, FN, TP]
+    # confusion matrix values
     tn = random.randint(220, 250)
     fp = random.randint(15, 35)
     fn = random.randint(10, 25)
@@ -44,7 +36,7 @@ def generate_realistic_metrics():
     f1 = 2 * precision * recall / (precision + recall)
     specificity = tn / (tn + fp)
 
-    # Training history (simulated 20 epochs)
+    # simulate 20 epochs of training history
     epochs = list(range(1, 21))
     train_loss = []
     val_loss = []
@@ -52,7 +44,7 @@ def generate_realistic_metrics():
     val_acc = []
 
     for i in range(20):
-        # Simulate typical training convergence
+        # exponential decay + noise to look realistic
         t_loss = 0.8 * np.exp(-0.15 * i) + 0.05 + random.uniform(-0.02, 0.02)
         v_loss = 0.9 * np.exp(-0.12 * i) + 0.08 + random.uniform(-0.03, 0.03)
         t_acc = 1.0 - 0.5 * np.exp(-0.2 * i) + random.uniform(-0.02, 0.02)
@@ -63,7 +55,7 @@ def generate_realistic_metrics():
         train_acc.append(round(min(t_acc, 0.99), 4))
         val_acc.append(round(min(v_acc, 0.98), 4))
 
-    # ROC curve data points
+    # ROC curve points
     roc_data = []
     for threshold in np.linspace(0, 1, 50):
         tpr = 1 - np.exp(-3 * threshold) + random.uniform(-0.02, 0.02)
@@ -119,13 +111,7 @@ def generate_realistic_metrics():
 
 @stats_bp.route("/api/model-stats", methods=["GET"])
 def get_model_stats():
-    """
-    Return comprehensive model performance statistics.
-
-    Returns:
-        JSON with confusion matrix, classification report,
-        training history, ROC curve data, and model info.
-    """
+    """Send back all the model performance metrics as JSON."""
     try:
         metrics = generate_realistic_metrics()
         return jsonify({

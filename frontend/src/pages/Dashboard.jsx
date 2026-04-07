@@ -1,9 +1,4 @@
-/**
- * Dashboard (Home) Page
- * ======================
- * Overview page showing system stats, model info, and recent activity.
- * This is the landing page after login.
- */
+// Home page — shows system overview, quick action buttons, and model info
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
@@ -62,7 +57,6 @@ export default function Dashboard() {
 
     return (
         <div className="space-y-8">
-            {/* Header */}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -76,7 +70,7 @@ export default function Dashboard() {
                 </p>
             </motion.div>
 
-            {/* Quick Actions */}
+            {/* quick actions */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <motion.div
                     initial={{ opacity: 0, x: -20 }}
@@ -125,7 +119,7 @@ export default function Dashboard() {
                 </motion.div>
             </div>
 
-            {/* Features Grid */}
+            {/* feature cards */}
             <div>
                 <h2 className="section-title">System Capabilities</h2>
                 <p className="section-subtitle mb-6">Advanced AI technologies powering precision diagnostics</p>
@@ -153,7 +147,7 @@ export default function Dashboard() {
                 </div>
             </div>
 
-            {/* Model Info */}
+            {/* model architecture info */}
             {stats && (
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
