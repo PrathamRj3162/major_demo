@@ -1,282 +1,166 @@
-# 🏥 AI-Driven Precision Diagnostics System
+# AI-Driven Precision Diagnostics System
 
 ## Pneumonia Detection using Deep Learning, Explainable AI & Federated Learning
 
-**Live Demo (Frontend)**: [https://pneumoai-diagnostics.vercel.app/](https://pneumoai-diagnostics.vercel.app/)  
-**Live API (Backend)**: [https://major-demo-1.onrender.com/api/health](https://major-demo-1.onrender.com/api/health)  
+B.Tech Major Project — Delhi Technological University
 
-> A production-level medical AI system that detects pneumonia from chest X-ray images using DenseNet121 (Transfer Learning), provides visual explanations via Grad-CAM, and demonstrates privacy-preserving federated learning across simulated hospital nodes.
+**Frontend (Vercel)**: https://pneumoai-diagnostics.vercel.app/  
+**Backend API (Render)**: https://major-demo-1.onrender.com/api/health  
 
----
-
-## 🎯 Project Overview
-
-| Feature | Technology |
-|---------|-----------|
-| **Deep Learning Model** | DenseNet121 (Transfer Learning from ImageNet) |
-| **Explainable AI** | Grad-CAM (Gradient-weighted Class Activation Mapping) |
-| **Federated Learning** | FedAvg algorithm across 4 simulated hospital clients |
-| **Backend API** | Flask + PyTorch |
-| **Frontend UI** | React 18 + Vite + Tailwind CSS |
-| **Visualization** | Recharts, Custom SVG gauges, Framer Motion animations |
+> Note: The Render free tier goes to sleep after 15 min idle. First request might take ~30 seconds to wake up.
 
 ---
 
-## 📸 Screenshots
+## What this project does
 
-*(Add screenshots of your UI here for the final presentation!)*
-- `Screenshot_1_Dashboard.png`
-- `Screenshot_2_Upload.png`
-- `Screenshot_3_GradCAM_Results.png`
+We built a web-based system that takes chest X-ray images as input and predicts whether the patient has pneumonia or not. It uses:
+
+- **DenseNet121** (pretrained on ImageNet, transfer learning) for classification
+- **Grad-CAM** to show which regions of the X-ray the model is focusing on — this is the explainability part
+- **Federated Learning (FedAvg)** simulation to show how the model could be trained across multiple hospitals without sharing patient data
+
+The frontend is built with React + Vite and the backend runs on Flask with PyTorch.
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 btech_major_final_project/
 ├── backend/
-│   ├── app.py                  # Flask application entry point
-│   ├── config.py               # Configuration constants
-│   ├── requirements.txt        # Python dependencies
+│   ├── app.py                  # main flask app
+│   ├── config.py               # all constants and paths
+│   ├── requirements.txt
 │   ├── models/
-│   │   ├── densenet_model.py   # DenseNet121 model architecture
-│   │   └── model_loader.py     # Singleton model loader
+│   │   ├── densenet_model.py   # DenseNet121 architecture
+│   │   └── model_loader.py     # loads and caches the model
 │   ├── services/
-│   │   ├── prediction.py       # Inference + confidence scoring
-│   │   ├── gradcam.py          # Grad-CAM heatmap generation
-│   │   └── federated.py        # FedAvg simulation engine
+│   │   ├── prediction.py       # runs inference
+│   │   ├── gradcam.py          # generates heatmaps
+│   │   └── federated.py        # FedAvg simulation
 │   ├── routes/
 │   │   ├── predict_routes.py   # /api/predict, /api/upload
 │   │   ├── gradcam_routes.py   # /api/gradcam
 │   │   ├── federated_routes.py # /api/federated-train
 │   │   └── stats_routes.py     # /api/model-stats
 │   ├── utils/
-│   │   ├── preprocessing.py    # Image resize, normalize pipeline
-│   │   └── helpers.py          # Base64 encoding, file helpers
-│   └── uploads/                # Uploaded X-ray images
+│   │   ├── preprocessing.py    # image resizing & normalization
+│   │   └── helpers.py          # base64, filenames, etc.
+│   └── uploads/                # temp folder for uploaded images
 ├── frontend/
 │   ├── src/
-│   │   ├── components/
-│   │   │   ├── Sidebar.jsx         # Navigation sidebar
-│   │   │   ├── StatCard.jsx        # Animated stat cards
-│   │   │   ├── ConfidenceGauge.jsx # SVG circular gauge
-│   │   │   ├── ImageUploader.jsx   # Drag-and-drop upload
-│   │   │   ├── GradCamViewer.jsx   # Grad-CAM visualization
-│   │   │   └── LoadingSpinner.jsx  # Loading animation
-│   │   ├── pages/
-│   │   │   ├── Dashboard.jsx       # Home/overview page
-│   │   │   ├── UploadPage.jsx      # Upload X-ray page
-│   │   │   ├── ResultsPage.jsx     # Analysis results
-│   │   │   ├── FederatedPage.jsx   # Federated learning dashboard
-│   │   │   └── PerformancePage.jsx # Model metrics & charts
-│   │   ├── services/
-│   │   │   └── api.js              # API service layer (axios)
-│   │   ├── App.jsx                 # Main app with routing
-│   │   ├── main.jsx                # Entry point
-│   │   └── index.css               # Tailwind + custom styles
-│   ├── package.json
-│   ├── vite.config.js              # Vite config with API proxy
-│   ├── tailwind.config.js          # Custom theme & animations
-│   └── index.html
-├── data/                           # Sample dataset guide
+│   │   ├── components/         # reusable UI components
+│   │   ├── pages/              # dashboard, upload, results, etc.
+│   │   ├── services/api.js     # axios calls to backend
+│   │   ├── App.jsx
+│   │   └── index.css
+│   ├── vite.config.js
+│   └── tailwind.config.js
+├── data/                       # dataset info (see data/README.md)
 └── README.md
 ```
 
 ---
 
-## 🚀 Setup & Installation
+## How to run locally
 
-### Prerequisites
-- **Python 3.9+** with pip
-- **Node.js 18+** with npm
-- **Git**
+### Requirements
+- Python 3.9+
+- Node.js 18+
 
-### Step 1: Clone the Repository
+### Backend
 ```bash
-cd /path/to/btech_major_final_project
-```
-
-### Step 2: Backend Setup
-```bash
-# Navigate to backend
 cd backend
-
-# Create virtual environment
 python -m venv venv
-source venv/bin/activate    # On Mac/Linux
-# .\venv\Scripts\activate   # On Windows
-
-# Install dependencies
+source venv/bin/activate
 pip install -r requirements.txt
-
-# Start the Flask server
 python app.py
 ```
-The backend will start at `http://localhost:5000`.
+Backend starts on http://localhost:5001
 
-### Step 3: Frontend Setup
+### Frontend
 ```bash
-# Open a new terminal, navigate to frontend
 cd frontend
-
-# Install dependencies
 npm install
-
-# Start development server
 npm run dev
 ```
-The frontend will start at `http://localhost:5173`.
-
-### Step 4: Open in Browser
-Navigate to `http://localhost:5173` in your browser.
+Frontend starts on http://localhost:5173
 
 ---
 
-## 📡 API Endpoints
+## API Endpoints
 
-| Method | Endpoint | Description |
+| Method | Endpoint | What it does |
 |--------|----------|-------------|
-| `GET` | `/api/health` | Health check |
-| `POST` | `/api/upload` | Upload an X-ray image |
-| `POST` | `/api/predict` | Run inference (upload + predict + Grad-CAM in one call) |
-| `POST` | `/api/gradcam` | Generate Grad-CAM visualization only |
-| `POST` | `/api/federated-train` | Run federated learning simulation |
-| `GET` | `/api/model-stats` | Get model performance metrics |
+| GET | /api/health | check if server is up |
+| POST | /api/upload | upload an xray image |
+| POST | /api/predict | upload + predict + gradcam all in one |
+| POST | /api/gradcam | just the gradcam heatmap |
+| POST | /api/federated-train | run FedAvg simulation |
+| GET | /api/model-stats | model performance numbers |
 
 ---
 
-## 🧠 AI Pipeline — How It Works
+## How the AI pipeline works
 
-```
-  ┌──────────────┐     ┌─────────────────┐     ┌──────────────────┐
-  │  Upload X-Ray │────▶│  Preprocessing   │────▶│  DenseNet121      │
-  │  (PNG/JPG)    │     │  Resize 224×224  │     │  Forward Pass     │
-  │               │     │  RGB Convert     │     │  Softmax → P(cls) │
-  └──────────────┘     │  ImageNet Norm   │     └────────┬─────────┘
-                        └─────────────────┘              │
-                                                         ▼
-  ┌──────────────┐     ┌─────────────────┐     ┌──────────────────┐
-  │  Final Result │◀────│ Decision Logic   │◀────│   Grad-CAM        │
-  │  + Grad-CAM   │     │ conf < 0.7 ?     │     │   Heatmap Gen     │
-  │  + Review Flag│     │ → Needs Review   │     │   Overlay on img  │
-  └──────────────┘     └─────────────────┘     └──────────────────┘
-```
+1. User uploads a chest X-ray through the UI
+2. Image is resized to 224x224, converted to RGB, normalized using ImageNet mean/std
+3. DenseNet121 runs a forward pass, softmax gives class probabilities
+4. If confidence < 70%, it flags "Needs Review" (for clinical safety)
+5. Grad-CAM hooks into the last DenseBlock, captures activations + gradients, generates a heatmap overlay
+6. Everything is sent back to the frontend — prediction, confidence, probabilities, and the Grad-CAM images
 
-1. **Image Upload**: User uploads a chest X-ray (PNG/JPEG)
-2. **Preprocessing**: Resize to 224×224, convert to RGB, normalize with ImageNet mean/std
-3. **Model Inference**: DenseNet121 outputs logits → softmax for probabilities
-4. **Confidence Decision**: If max probability < 70% → flagged as "Needs Review"
-5. **Grad-CAM**: Hooks on the last DenseBlock capture activations + gradients → heatmap overlay
-6. **Response**: Prediction, confidence score, and Grad-CAM visualization returned
+## Federated Learning
+
+We simulate FedAvg across multiple hospital clients:
+- Server sends global model to all clients
+- Each client trains on its local data (we use synthetic data for the demo)
+- Clients send back model weights (not the data itself — thats the privacy part)
+- Server does a weighted average (weighted by dataset size)
+- This repeats for N rounds
+
+We use a smaller CNN instead of DenseNet for this because training DenseNet on CPU would take forever. The smaller model still shows convergence properly.
 
 ---
 
-## 🔗 Federated Learning — FedAvg Algorithm
+## Pages in the UI
 
-```
-  ┌───────────────── Central Server ─────────────────┐
-  │   θ_global = Σ (n_k / n) × θ_k                   │
-  │   (Weighted average of all client parameters)      │
-  └──────┬────────┬────────┬────────┬────────────────┘
-         │        │        │        │
-   ┌─────┴──┐ ┌──┴─────┐ ┌┴──────┐ ┌┴──────┐
-   │ Hosp A │ │ Hosp B │ │Hosp C │ │Hosp D │
-   │ n=80   │ │ n=75   │ │ n=85  │ │ n=70  │
-   └────────┘ └────────┘ └───────┘ └───────┘
-```
-
-1. Server distributes global model to all clients
-2. Each client trains locally on its private data shard
-3. Clients send updated model weights (NOT data) to server
-4. Server aggregates via FedAvg: weighted average by dataset size
-5. Repeat for N rounds until convergence
+1. **Dashboard** — overview, model info, quick links
+2. **Upload** — drag and drop an xray, click analyze
+3. **Results** — shows prediction, confidence gauge, Grad-CAM overlay
+4. **Federated Learning** — configurable simulation with charts
+5. **Performance** — confusion matrix, loss/acc curves, ROC curve
 
 ---
 
-## 🖼️ UI Pages
+## Dataset
 
-1. **Dashboard** — System overview, stats, quick actions, model info
-2. **Upload X-Ray** — Drag-and-drop with preview, one-click analysis
-3. **Results** — Prediction label, confidence gauge, Grad-CAM overlay, probability bars
-4. **Federated Learning** — Configurable simulation, convergence charts, client comparison
-5. **Model Performance** — Confusion matrix, loss/accuracy curves, ROC curve, classification report
-
----
-
-## 📊 Sample Dataset
-
-This project is designed to work with the **Chest X-Ray Images (Pneumonia)** dataset from Kaggle:
-
-- **Dataset**: [Chest X-Ray Images (Pneumonia)](https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia)
-- **Size**: ~2GB (5,863 images)
-- **Classes**: NORMAL, PNEUMONIA
-- **Split**: train/val/test
-
-To use with a trained model:
-1. Download the dataset from Kaggle
-2. Train DenseNet121 using the training scripts
-3. Save the best model weights to `backend/models/best_model.pth`
-
-> **Note**: The system works out-of-the-box with ImageNet pretrained weights (no fine-tuned model needed). Fine-tuning on the chest X-ray dataset improves accuracy from ~50% to ~95%+.
+We used the Chest X-Ray Pneumonia dataset from Kaggle (Kermany et al.):
+- https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia
+- ~5800 images, 2 classes (NORMAL / PNEUMONIA)
+- The system works without fine-tuned weights too (just uses ImageNet defaults), but accuracy is much better after training on this dataset
 
 ---
 
-## 🛠️ Technology Stack
+## Tech Stack
 
-| Layer | Technology | Purpose |
-|-------|-----------|---------|
-| **Model** | PyTorch + torchvision | DenseNet121 transfer learning |
-| **XAI** | Custom Grad-CAM | Visual explanations |
-| **FL** | Custom FedAvg | Federated learning simulation |
-| **Backend** | Flask + Flask-CORS | REST API server |
-| **Frontend** | React 18 + Vite | UI framework |
-| **Styling** | Tailwind CSS 3 | Utility-first CSS |
-| **Charts** | Recharts | Data visualization |
-| **Animation** | Framer Motion | UI animations |
-| **Icons** | Lucide React | Icon library |
-| **HTTP** | Axios | API communication |
-| **Image** | OpenCV + Pillow | Image processing |
+- **Backend**: Flask, PyTorch, torchvision, OpenCV, Pillow
+- **Frontend**: React 18, Vite, Tailwind CSS, Recharts, Framer Motion, Lucide icons, Axios
+- **Deployment**: Render (backend), Vercel (frontend)
 
 ---
 
-## 🎓 Key Concepts for Viva
+## Deployment
 
-1. **Transfer Learning**: Reusing ImageNet-pretrained DenseNet121 features instead of training from scratch
-2. **Grad-CAM**: Uses gradients flowing into the last convolutional layer to produce a coarse localization map highlighting important regions
-3. **FedAvg**: Federated Averaging — each client trains locally, server aggregates by weighted average of parameters
-4. **Confidence Thresholding**: Low-confidence predictions are flagged for human review, improving clinical safety
-5. **DenseNet Architecture**: Dense connections (feature reuse) reduce parameters while maintaining performance
+### Backend on Render
+- Create a Web Service, set root directory to `backend`
+- Build command: `pip install -r requirements.txt`
+- Start command: `gunicorn "app:create_app()" --bind 0.0.0.0:$PORT --timeout 300`
 
----
-
-## 🌐 Deployment (Public Link)
-
-Deploy the app publicly using **Render** (backend) + **Vercel** (frontend) — both free.
-
-### Backend → Render
-1. Go to [render.com](https://render.com) → Sign up with GitHub
-2. **New → Web Service** → Connect this repo
-3. Set **Root Directory**: `backend`, **Runtime**: Python 3
-4. **Build Command**: `pip install -r requirements.txt`
-5. **Start Command**: `gunicorn "app:create_app()" --bind 0.0.0.0:$PORT --timeout 300`
-6. Deploy → Note the URL (e.g. `https://ai-diagnostics-backend.onrender.com`)
-
-### Frontend → Vercel
-1. Go to [vercel.com](https://vercel.com) → Sign up with GitHub
-2. **Add New → Project** → Import this repo
-3. Set **Framework**: Vite, **Root Directory**: `frontend`
-4. Add **Environment Variable**: `VITE_API_URL` = `https://<your-render-url>/api`
-5. Deploy → You get a public URL like `https://ai-diagnostics.vercel.app`
-
-> **Note**: Render free tier sleeps after 15 min of inactivity. First request after idle takes ~30s.
+### Frontend on Vercel
+- Import the repo, set framework to Vite, root directory to `frontend`
+- Add env variable: `VITE_API_URL` = your Render backend URL + `/api`
 
 ---
 
-## 📄 License
-
-This project is for educational purposes (B.Tech Final Year Project).
-
----
-
-**Built with using PyTorch, Flask, React, and Tailwind CSS**
+This project was built as part of our B.Tech final year major project at DTU.
