@@ -160,7 +160,7 @@ export default function PerformancePage() {
                 >
                     <h3 className="text-lg font-semibold text-white mb-4">Training & Validation Loss</h3>
                     <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={getTrainingData()}>
+                        <LineChart data={getTrainingData()} style={{ backgroundColor: 'transparent' }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                             <XAxis dataKey="epoch" stroke="#64748b" label={{ value: 'Epoch', position: 'bottom', fill: '#64748b' }} />
                             <YAxis stroke="#64748b" />
@@ -187,7 +187,7 @@ export default function PerformancePage() {
                 >
                     <h3 className="text-lg font-semibold text-white mb-4">Training & Validation Accuracy</h3>
                     <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={getTrainingData()}>
+                        <LineChart data={getTrainingData()} style={{ backgroundColor: 'transparent' }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                             <XAxis dataKey="epoch" stroke="#64748b" label={{ value: 'Epoch', position: 'bottom', fill: '#64748b' }} />
                             <YAxis stroke="#64748b" domain={[0, 100]} />
@@ -217,7 +217,7 @@ export default function PerformancePage() {
                 <h3 className="text-lg font-semibold text-white mb-2">ROC Curve</h3>
                 <p className="text-dark-400 text-sm mb-4">AUC = {roc_curve.auc.toFixed(4)}</p>
                 <ResponsiveContainer width="100%" height={350}>
-                    <AreaChart data={getRocData()}>
+                    <AreaChart data={getRocData()} style={{ backgroundColor: 'transparent' }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                         <XAxis
                             dataKey="fpr"

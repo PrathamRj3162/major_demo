@@ -219,7 +219,7 @@ export default function FederatedPage() {
                         <div className="glass-card p-6">
                             <h3 className="text-lg font-semibold text-white mb-4">Global Model Convergence</h3>
                             <ResponsiveContainer width="100%" height={300}>
-                                <LineChart data={getConvergenceData()}>
+                                <LineChart data={getConvergenceData()} style={{ backgroundColor: 'transparent' }}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                                     <XAxis dataKey="round" stroke="#64748b" />
                                     <YAxis yAxisId="left" stroke="#64748b" />
@@ -259,7 +259,7 @@ export default function FederatedPage() {
                         <div className="glass-card p-6">
                             <h3 className="text-lg font-semibold text-white mb-4">Client Performance Comparison (Final Round)</h3>
                             <ResponsiveContainer width="100%" height={300}>
-                                <BarChart data={getClientComparisonData()}>
+                                <BarChart data={getClientComparisonData()} style={{ backgroundColor: 'transparent' }}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                                     <XAxis dataKey="name" stroke="#64748b" />
                                     <YAxis stroke="#64748b" />
