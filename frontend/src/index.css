@@ -143,6 +143,13 @@ body {
   transition: stroke-dashoffset 1.5s ease-in-out;
 }
 
+/* force recharts transparent backgrounds */
+.recharts-wrapper,
+.recharts-wrapper svg,
+.recharts-surface {
+  background-color: transparent !important;
+}
+
 /* upload drag area */
 .dropzone-active {
   @apply border-primary-400 bg-primary-900/20;
