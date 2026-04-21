@@ -23,6 +23,7 @@ from config import (
     GRAYSCALE_THRESHOLD,
     ASPECT_RATIO_RANGE,
     SOFTMAX_ENTROPY_THRESHOLD,
+    CRITICAL_ENTROPY_THRESHOLD,
     ACTIVATION_ENERGY_MIN
 )
 
@@ -188,6 +189,16 @@ def validate_chest_xray(image_tensor, pil_image):
     # this prevents false rejections from a single borderline check
     num_failed = len(failed_reasons)
     is_chest_xray = num_failed < 2
+
+    # HARD REJECT: if entropy is critically high (near max 0.693),
+    # the model is completely lost — reject regardless of other checks.
+    # This catches animal X-rays that are grayscale and square-ish.
+    if mc_extra.get("entropy", 0) > CRITICAL_ENTROPY_THRESHOLD:
+        is_chest_xray = False
+        if "Model's internal features suggest this is not a chest X-ray" not in failed_reasons:
+            failed_reasons.append(
+                "Model's internal features suggest this is not a chest X-ray"
+            )
 
     result = {
         "is_chest_xray": is_chest_xray,
