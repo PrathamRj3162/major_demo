@@ -34,7 +34,7 @@ ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "bmp", "tiff"}
 # if channel diff is above this, image is probably not grayscale (not an X-ray)
 GRAYSCALE_THRESHOLD = 25.0
 # chest X-rays are roughly square or slightly portrait — reject extreme ratios
-ASPECT_RATIO_RANGE = (0.4, 2.5)
+ASPECT_RATIO_RANGE = (0.5, 1.8)
 # softmax entropy above this means model is very confused (max for 2 classes ≈ 0.693)
 SOFTMAX_ENTROPY_THRESHOLD = 0.65
 # minimum L2 norm of DenseNet feature vector for a plausible chest X-ray

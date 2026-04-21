@@ -118,9 +118,9 @@ def _check_model_confidence(image_tensor):
     entropy_ok = bool(entropy < SOFTMAX_ENTROPY_THRESHOLD)
     energy_ok = bool(activation_energy > ACTIVATION_ENERGY_MIN)
 
-    # both must be suspicious for us to reject —
-    # we want to avoid false rejections of valid X-rays
-    passed = bool(entropy_ok or energy_ok)
+    # both signals must look normal for this check to pass —
+    # high entropy alone (confused model) is enough to fail
+    passed = bool(entropy_ok and energy_ok)
 
     detail = (
         f"Entropy: {entropy:.3f} (threshold: {SOFTMAX_ENTROPY_THRESHOLD}), "
