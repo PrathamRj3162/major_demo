@@ -30,5 +30,15 @@ FED_LEARNING_RATE = 0.001
 # allowed image types for upload
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "bmp", "tiff"}
 
+# chest X-ray validation thresholds (OOD detection)
+# if channel diff is above this, image is probably not grayscale (not an X-ray)
+GRAYSCALE_THRESHOLD = 25.0
+# chest X-rays are roughly square or slightly portrait — reject extreme ratios
+ASPECT_RATIO_RANGE = (0.4, 2.5)
+# softmax entropy above this means model is very confused (max for 2 classes ≈ 0.693)
+SOFTMAX_ENTROPY_THRESHOLD = 0.65
+# minimum L2 norm of DenseNet feature vector for a plausible chest X-ray
+ACTIVATION_ENERGY_MIN = 5.0
+
 # make sure the uploads folder exists
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)

@@ -5,7 +5,7 @@ import { useLocation, Link, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
     CheckCircle2, AlertTriangle, ArrowLeft, Upload,
-    ShieldCheck, ShieldAlert, BarChart3
+    ShieldCheck, ShieldAlert, BarChart3, BadgeCheck
 } from 'lucide-react';
 import ConfidenceGauge from '../components/ConfidenceGauge';
 import GradCamViewer from '../components/GradCamViewer';
@@ -78,6 +78,19 @@ export default function ResultsPage() {
                             >
                                 <AlertTriangle className="w-4 h-4" />
                                 Needs Clinical Review — Low Confidence
+                            </motion.div>
+                        )}
+
+                        {/* show that the image passed chest X-ray validation */}
+                        {result.is_chest_xray && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: 0.2 }}
+                                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-900/25 border border-violet-500/25 text-violet-300 text-xs font-medium mb-4 ml-2"
+                            >
+                                <BadgeCheck className="w-3.5 h-3.5" />
+                                Validated Chest X-Ray
                             </motion.div>
                         )}
 

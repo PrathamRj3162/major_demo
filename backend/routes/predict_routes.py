@@ -73,6 +73,20 @@ def predict_image():
     try:
         image_tensor, pil_image = preprocess_image(image_path)
 
+        # validate that this is actually a chest X-ray before predicting
+        from services.chest_xray_validator import validate_chest_xray
+        validation = validate_chest_xray(image_tensor, pil_image)
+
+        if not validation["is_chest_xray"]:
+            return jsonify({
+                "error": "Image validation failed",
+                "is_chest_xray": False,
+                "rejection_reason": validation["rejection_reason"],
+                "validation_checks": validation["checks"],
+                "num_checks_passed": validation["num_checks_passed"],
+                "num_checks_total": validation["num_checks_total"]
+            }), 400
+
         result = predict(image_tensor)
 
         # grab the shared GradCAM instance
@@ -92,6 +106,8 @@ def predict_image():
         response["original_image"] = image_to_base64(pil_image)
         response["heatmap_image"] = image_to_base64(heatmap_img)
         response["threshold"] = result["threshold"]
+        response["is_chest_xray"] = True
+        response["validation_checks"] = validation["checks"]
 
         return jsonify(response), 200
 

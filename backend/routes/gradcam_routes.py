@@ -44,6 +44,18 @@ def generate_gradcam():
     try:
         image_tensor, pil_image = preprocess_image(image_path)
 
+        # validate that this is actually a chest X-ray
+        from services.chest_xray_validator import validate_chest_xray
+        validation = validate_chest_xray(image_tensor, pil_image)
+
+        if not validation["is_chest_xray"]:
+            return jsonify({
+                "error": "Image validation failed",
+                "is_chest_xray": False,
+                "rejection_reason": validation["rejection_reason"],
+                "validation_checks": validation["checks"]
+            }), 400
+
         result = predict(image_tensor)
 
         from app import get_gradcam
@@ -58,7 +70,8 @@ def generate_gradcam():
             "heatmap_image": image_to_base64(heatmap_img),
             "prediction": result["predicted_class"],
             "confidence": round(result["confidence"] * 100, 2),
-            "target_class": result["predicted_class"]
+            "target_class": result["predicted_class"],
+            "is_chest_xray": True
         }), 200
 
     except Exception as e:
