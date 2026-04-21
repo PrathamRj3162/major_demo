@@ -46,7 +46,7 @@ def _check_grayscale(pil_image):
 
     avg_channel_diff = (rg_diff + rb_diff + gb_diff) / 3.0
 
-    passed = avg_channel_diff < GRAYSCALE_THRESHOLD
+    passed = bool(avg_channel_diff < GRAYSCALE_THRESHOLD)
     detail = f"Channel difference: {avg_channel_diff:.1f} (threshold: {GRAYSCALE_THRESHOLD})"
 
     return passed, detail
@@ -62,7 +62,7 @@ def _check_aspect_ratio(pil_image):
     ratio = w / h if h > 0 else 999
 
     min_ratio, max_ratio = ASPECT_RATIO_RANGE
-    passed = min_ratio <= ratio <= max_ratio
+    passed = bool(min_ratio <= ratio <= max_ratio)
     detail = f"Aspect ratio: {ratio:.2f} (expected: {min_ratio}-{max_ratio})"
 
     return passed, detail
@@ -115,12 +115,12 @@ def _check_model_confidence(image_tensor):
     else:
         activation_energy = 0.0
 
-    entropy_ok = entropy < SOFTMAX_ENTROPY_THRESHOLD
-    energy_ok = activation_energy > ACTIVATION_ENERGY_MIN
+    entropy_ok = bool(entropy < SOFTMAX_ENTROPY_THRESHOLD)
+    energy_ok = bool(activation_energy > ACTIVATION_ENERGY_MIN)
 
     # both must be suspicious for us to reject —
     # we want to avoid false rejections of valid X-rays
-    passed = entropy_ok or energy_ok
+    passed = bool(entropy_ok or energy_ok)
 
     detail = (
         f"Entropy: {entropy:.3f} (threshold: {SOFTMAX_ENTROPY_THRESHOLD}), "
