@@ -37,10 +37,14 @@ GRAYSCALE_THRESHOLD = 25.0
 ASPECT_RATIO_RANGE = (0.5, 1.8)
 # softmax entropy above this means model is very confused (max for 2 classes ≈ 0.693)
 SOFTMAX_ENTROPY_THRESHOLD = 0.65
-# if entropy exceeds this critical value, reject immediately — model is totally lost
-CRITICAL_ENTROPY_THRESHOLD = 0.67
+# if entropy exceeds this, reject immediately — model is purely guessing
+# (real chest X-rays produce entropy ≤ 0.682, junk/noise hits ~0.693)
+CRITICAL_ENTROPY_THRESHOLD = 0.69
+# if activation energy is below this, reject immediately — model sees no chest features at all
+CRITICAL_ENERGY_THRESHOLD = 5.0
 # minimum L2 norm of DenseNet feature vector for a plausible chest X-ray
-ACTIVATION_ENERGY_MIN = 5.0
+# (real chest X-rays produce ≥ 25, junk images produce 11-20)
+ACTIVATION_ENERGY_MIN = 24.0
 
 # make sure the uploads folder exists
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)

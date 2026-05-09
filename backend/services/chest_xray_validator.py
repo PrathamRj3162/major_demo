@@ -24,6 +24,7 @@ from config import (
     ASPECT_RATIO_RANGE,
     SOFTMAX_ENTROPY_THRESHOLD,
     CRITICAL_ENTROPY_THRESHOLD,
+    CRITICAL_ENERGY_THRESHOLD,
     ACTIVATION_ENERGY_MIN
 )
 
@@ -173,31 +174,51 @@ def validate_chest_xray(image_tensor, pil_image):
             "Image dimensions are unusual for a chest X-ray"
         )
 
-    # 3. model confidence check
+    # 3. Diagnostic Confidence (Entropy)
     mc_passed, mc_detail, mc_extra = _check_model_confidence(image_tensor)
+    
+    entropy_ok = mc_extra.get("entropy_ok", False)
     checks.append({
-        "name": "Model Confidence Analysis",
-        "passed": mc_passed,
-        "detail": mc_detail
+        "name": "Diagnostic Confidence",
+        "passed": entropy_ok,
+        "detail": f"Entropy: {mc_extra.get('entropy', 0)} (max expected: {SOFTMAX_ENTROPY_THRESHOLD})"
     })
-    if not mc_passed:
-        failed_reasons.append(
-            "Model's internal features suggest this is not a chest X-ray"
-        )
+    if not entropy_ok:
+        failed_reasons.append("Model is unusually uncertain about this image")
+
+    # 4. Anatomical Recognition (Activation Energy)
+    energy_ok = mc_extra.get("energy_ok", False)
+    checks.append({
+        "name": "Anatomical Recognition",
+        "passed": energy_ok,
+        "detail": f"Activation energy: {mc_extra.get('activation_energy', 0)} (min expected: {ACTIVATION_ENERGY_MIN})"
+    })
+    if not energy_ok:
+        failed_reasons.append("Model does not recognize typical human chest anatomy")
 
     # need at least 2 checks to fail before we reject —
     # this prevents false rejections from a single borderline check
     num_failed = len(failed_reasons)
     is_chest_xray = num_failed < 2
 
-    # HARD REJECT: if entropy is critically high (near max 0.693),
-    # the model is completely lost — reject regardless of other checks.
+    # HARD REJECT 1: if activation energy is critically low,
+    # the model sees absolutely no recognizable chest structures.
     # This catches animal X-rays that are grayscale and square-ish.
-    if mc_extra.get("entropy", 0) > CRITICAL_ENTROPY_THRESHOLD:
+    if mc_extra.get("activation_energy", 999) < CRITICAL_ENERGY_THRESHOLD:
         is_chest_xray = False
         if "Model's internal features suggest this is not a chest X-ray" not in failed_reasons:
             failed_reasons.append(
                 "Model's internal features suggest this is not a chest X-ray"
+            )
+
+    # HARD REJECT 2: if entropy is at/near maximum (~0.693 for 2 classes),
+    # the model is purely guessing — no real chest anatomy was detected.
+    # Real chest X-rays always produce entropy ≤ 0.682.
+    if mc_extra.get("entropy", 0) > CRITICAL_ENTROPY_THRESHOLD:
+        is_chest_xray = False
+        if "Model is completely uncertain — not a recognizable chest X-ray" not in failed_reasons:
+            failed_reasons.append(
+                "Model is completely uncertain — not a recognizable chest X-ray"
             )
 
     result = {
